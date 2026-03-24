@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-TW" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>As Time Goes By 手作｜時光造所</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #faf8f5; color: #2c2418; font-family: 'Noto Sans TC', sans-serif; }
+    .fade-in { animation: fadeIn 0.6s ease forwards; opacity: 0; }
+    .fade-in-delay-1 { animation-delay: 0.1s; }
+    .fade-in-delay-2 { animation-delay: 0.2s; }
+    .fade-in-delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(16px); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-up { animation: slideUp 0.5s ease forwards; }
+    .service-card { transition: all 0.3s ease; border: 1px solid #e8e0d4; background: #fff; }
+    .service-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+    .time-slot { transition: all 0.2s ease; border: 1px solid #e8e0d4; }
+    .time-slot:hover:not(.selected) { background: #f0ebe3; border-color: #8b7355; }
+    .time-slot.selected { background: #2c2418; color: #fff; border-color: #2c2418; }
+    .nav-dot { transition: all 0.3s ease; background: #c4b89a; }
+    .nav-dot.active { background: #2c2418; transform: scale(1.3); }
+    .toast-enter { animation: toastIn 0.4s ease forwards; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="h-full">
+  <div id="app-wrapper" class="h-full w-full overflow-auto">
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <nav class="sticky top-0 z-40 backdrop-blur-md border-b" style="background: rgba(250,248,245,0.92); border-color: #e8e0d4;">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: #2c2418;">
+            <i data-lucide="palette" class="w-4 h-4 text-[#faf8f5]"></i>
+          </div>
+          <span class="font-semibold text-sm" style="font-family: 'Playfair Display', serif;">時光造所</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="showView('home')" id="dot-home" class="nav-dot w-2.5 h-2.5 rounded-full active"></button>
+          <button onclick="showView('booking')" id="dot-booking" class="nav-dot w-2.5 h-2.5 rounded-full"></button>
+          <button onclick="showView('info')" id="dot-info" class="nav-dot w-2.5 h-2.5 rounded-full"></button>
+          <button onclick="showView('records')" id="dot-records" class="nav-dot w-2.5 h-2.5 rounded-full"></button>
+        </div>
+      </div>
+    </nav>
+
+    <section id="view-home">
+      <header class="px-4 pt-12 pb-8 text-center">
+        <h1 class="fade-in text-3xl font-bold mb-2" style="font-family: 'Playfair Display', serif;">時光造所</h1>
+        <p class="fade-in fade-in-delay-1 text-sm font-medium mb-2 text-[#8b7355]">As Time Goes By 手作</p>
+        <p class="fade-in fade-in-delay-2 text-xs leading-relaxed mb-6 text-[#8b7355] max-w-xs mx-auto">當時光慢慢流逝，許多事物會悄然消失，但我們至少能把握，這一刻的美好。</p>
+        <button onclick="showView('booking')" class="fade-in fade-in-delay-3 inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-medium bg-[#2c2418] text-[#faf8f5] hover:shadow-lg transition-all">
+          <i data-lucide="calendar-plus" class="w-4 h-4"></i> 立即預約
+        </button>
+      </header>
+      <div class="px-4 pb-12">
+        <div class="grid grid-cols-1 gap-4" id="services-grid">
+          </div>
+      </div>
+    </section>
+
+    <section id="view-booking" class="hidden px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <button onclick="showView('home')" class="flex items-center gap-1 text-sm mb-6 text-[#8b7355] hover:opacity-70">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> 返回首頁
+            </button>
+            
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div id="step-1-indicator" class="flex flex-col items-center gap-1">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[#2c2418] text-white">1</div>
+                    <span class="text-[10px]">選服務</span>
+                </div>
+                <div class="w-8 h-px bg-[#e8e0d4]"></div>
+                <div id="step-2-indicator" class="flex flex-col items-center gap-1">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[#e8e0d4] text-[#8b7355]">2</div>
+                    <span class="text-[10px]">選時間</span>
+                </div>
+                <div class="w-8 h-px bg-[#e8e0d4]"></div>
+                <div id="step-3-indicator" class="flex flex-col items-center gap-1">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[#e8e0d4] text-[#8b7355]">3</div>
+                    <span class="text-[10px]">填資料</span>
+                </div>
+            </div>
+
+            <div id="booking-steps">
+                <div id="step-1" class="slide-up">
+                    <div class="bg-white rounded-2xl p-5 border border-[#e8e0d4] mb-4">
+                        <label class="block text-sm font-bold mb-4">請選擇服務項目</label>
+                        <div id="service-options" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <div id="step-2" class="hidden slide-up">
+                    <div class="bg-white rounded-2xl p-5 border border-[#e8e0d4] mb-4">
+                        <div id="calendar-container">
+                            <div class="flex justify-between items-center mb-4">
+                                <button onclick="changeMonth(-1)"><i data-lucide="chevron-left"></i></button>
+                                <span id="calendar-month" class="font-bold"></span>
+                                <button onclick="changeMonth(1)"><i data-lucide="chevron-right"></i></button>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-[10px] mb-2 text-[#8b7355]">
+                                <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                            </div>
+                            <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+                        </div>
+                        <div id="time-section" class="mt-6 hidden">
+                            <label class="block text-sm font-bold mb-3">選擇時段</label>
+                            <div id="time-slots" class="grid grid-cols-3 gap-2"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="goToStep(1)" class="flex-1 py-3 bg-[#f0ebe3] rounded-xl text-sm font-medium">上一步</button>
+                        <button id="btn-to-step3" onclick="goToStep(3)" disabled class="flex-1 py-3 bg-[#2c2418] text-white rounded-xl text-sm font-medium opacity-50">下一步</button>
+                    </div>
+                </div>
+
+                <div id="step-3" class="hidden slide-up">
+                    <form onsubmit="event.preventDefault(); submitBooking();" class="space-y-4">
+                        <div class="bg-white rounded-2xl p-5 border border-[#e8e0d4]">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold mb-1">姓名 *</label>
+                                    <input type="text" id="input-name" required class="w-full p-3 bg-[#faf8f5] rounded-lg text-sm border border-[#e8e0d4]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold mb-1">電話 *</label>
+                                    <input type="tel" id="input-phone" required class="w-full p-3 bg-[#faf8f5] rounded-lg text-sm border border-[#e8e0d4]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold mb-1">備註</label>
+                                    <textarea id="input-notes" class="w-full p-3 bg-[#faf8f5] rounded-lg text-sm border border-[#e8e0d4]"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="confirm-box" class="bg-[#fcfaf7] p-4 rounded-xl text-xs border border-dashed border-[#c4b89a]">
+                            </div>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="goToStep(2)" class="flex-1 py-3 bg-[#f0ebe3] rounded-xl text-sm font-medium">上一步</button>
+                            <button type="submit" class="flex-1 py-3 bg-[#2c2418] text-white rounded-xl text-sm font-medium">確認預約</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-info" class="hidden px-4 py-8">
+        <div class="max-w-md mx-auto space-y-4">
+            <div class="bg-white p-6 rounded-2xl border border-[#e8e0d4]">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#8b7355]"></i> 店家位置</h3>
+                <p class="text-sm text-[#8b7355]">新北市板橋區民生路三段122號2樓</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-[#e8e0d4]">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="instagram" class="w-4 h-4 text-[#8b7355]"></i> 社交媒體</h3>
+                <div class="flex gap-4">
+                    <a href="https://www.instagram.com/astimegoesby_handmade/" class="text-xs text-blue-600">Instagram</a>
+                    <a href="https://www.facebook.com/astimegoesbyhandmade/" class="text-xs text-blue-600">Facebook</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-records" class="hidden px-4 py-8">
+        <div class="max-w-md mx-auto text-center py-20">
+            <i data-lucide="calendar-x" class="w-12 h-12 mx-auto text-[#c4b89a] mb-4"></i>
+            <p class="text-sm text-[#8b7355]">本機目前尚無預約紀錄</p>
+        </div>
+    </section>
+
+    <footer class="py-10 text-center text-[10px] text-[#c4b89a]">
+      © 時光造所 — 讓每一刻都成為回憶
+    </footer>
+  </div>
+
+  <script>
+    // 資料定義
+    const services = [
+      { id: 'watercolor', name: '水彩速寫體驗', icon: 'palette', desc: '靜靜地啜飲時光，讓顏色與生活一起沉澱' },
+      { id: 'beads', name: '手作別針串珠 DIY', icon: 'sparkles', desc: '創意手作，做出獨一無二的飾品' },
+      { id: 'studio', name: '攝影棚預約', icon: 'camera', desc: '專業攝影空間，完善的器材與佈景' }
+    ];
+
+    let state = {
+      view: 'home',
+      step: 1,
+      service: null,
+      date: null,
+      time: null,
+      month: new Date()
+    };
+
+    // 初始化服務清單
+    function init() {
+        const grid = document.getElementById('services-grid');
+        services.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'service-card p-5 rounded-2xl cursor-pointer';
+            card.innerHTML = `
+                <div class="w-10 h-10 bg-[#fcfaf7] rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="${s.icon}" class="w-5 h-5 text-[#8b7355]"></i>
+                </div>
+                <h3 class="font-bold text-sm mb-1">${s.name}</h3>
+                <p class="text-xs text-[#8b7355]">${s.desc}</p>
+            `;
+            card.onclick = () => {
+                state.service = s.name;
+                showView('booking');
+                goToStep(2);
+            };
+            grid.appendChild(card);
+        });
+        renderCalendar();
+        lucide.createIcons();
+    }
+
+    // 視圖切換
+    function showView(view) {
+        state.view = view;
+        ['home', 'booking', 'info', 'records'].forEach(v => {
+            document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view);
+            document.getElementById(`dot-${v}`).classList.toggle('active', v === view);
+        });
+        window.scrollTo(0,0);
+    }
+
+    // 步驟控制
+    function goToStep(step) {
+        state.step = step;
+        [1, 2, 3].forEach(s => {
+            document.getElementById(`step-${s}`).classList.toggle('hidden', s !== step);
+            const ind = document.getElementById(`step-${s}-indicator`).querySelector('div');
+            ind.className = `w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${s <= step ? 'bg-[#2c2418] text-white' : 'bg-[#e8e0d4] text-[#8b7355]'}`;
+        });
+        if(step === 3) updateSummary();
+    }
+
+    function updateSummary() {
+        document.getElementById('confirm-box').innerHTML = `
+            <p><b>預約服務：</b>${state.service}</p>
+            <p><b>預約日期：</b>${state.date}</p>
+            <p><b>預約時間：</b>${state.time}</p>
+        `;
+    }
+
+    // 日曆邏輯
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        const label = document.getElementById('calendar-month');
+        const y = state.month.getFullYear(), m = state.month.getMonth();
+        label.innerText = `${y} 年 ${m + 1} 月`;
+        grid.innerHTML = '';
+        const first = new Date(y, m, 1).getDay();
+        const days = new Date(y, m + 1, 0).getDate();
+        for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
+        for(let d=1; d<=days; d++) {
+            const btn = document.createElement('button');
+            const dStr = `${y}-${m+1}-${d}`;
+            btn.innerText = d;
+            btn.className = `p-2 text-xs rounded-lg ${state.date === dStr ? 'bg-[#2c2418] text-white' : 'hover:bg-gray-100'}`;
+            btn.onclick = () => { state.date = dStr; renderCalendar(); document.getElementById('time-section').classList.remove('hidden'); renderTimes(); };
+            grid.appendChild(btn);
+        }
+    }
+
+    function changeMonth(n) { state.month.setMonth(state.month.getMonth() + n); renderCalendar(); }
+
+    function renderTimes() {
+        const slots = ['13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+        const container = document.getElementById('time-slots');
+        container.innerHTML = '';
+        slots.forEach(t => {
+            const b = document.createElement('button');
+            b.innerText = t;
+            b.className = `p-2 text-xs border rounded-lg ${state.time === t ? 'bg-[#2c2418] text-white' : ''}`;
+            b.onclick = () => { state.time = t; renderTimes(); document.getElementById('btn-to-step3').disabled = false; document.getElementById('btn-to-step3').classList.remove('opacity-50'); };
+            container.appendChild(b);
+        });
+    }
+
+    // 提交預約
+    function submitBooking() {
+        const name = document.getElementById('input-name').value;
+        showToast(`感謝您，${name}！預約已送出。`, 'success');
+        setTimeout(() => location.reload(), 3000);
+    }
+
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.className = 'toast-enter p-4 bg-[#2c2418] text-white rounded-lg shadow-xl text-sm';
+        t.innerText = msg;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

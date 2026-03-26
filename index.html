@@ -63,6 +63,24 @@
       </header>
 
       <div class="px-4 pb-12 max-w-2xl mx-auto space-y-8">
+        <!-- 攝影棚租借區塊 -->
+        <div class="bg-white rounded-3xl border border-[#e8e0d4] p-6 shadow-sm overflow-hidden fade-in">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-[#fcfaf7] rounded-xl flex items-center justify-center">
+                    <i data-lucide="camera" class="w-6 h-6 text-[#2c2418]"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold">攝影棚租借</h2>
+                    <p class="text-[10px] text-[#8b7355]">Studio Rental (Natural Light & Paper)</p>
+                </div>
+            </div>
+            <p class="text-xs text-[#8b7355] leading-relaxed mb-6 border-l-2 border-[#e8e0d4] pl-3">
+                專業攝影空間，擁有窗戶自然光與電動背景紙。<br>
+                完善的燈具器材與獨立整備間，讓創作更自由。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="studio-options"></div>
+        </div>
+
         <!-- 水彩速寫區塊 -->
         <div class="bg-white rounded-3xl border border-[#e8e0d4] p-6 shadow-sm overflow-hidden fade-in">
             <div class="flex items-center gap-3 mb-4">
@@ -252,6 +270,10 @@
   <script>
     const SCRIPT_URL = "你的_GOOGLE_APPS_SCRIPT_網址";
 
+    const studioOptions = [
+      { id: 'st_a', type: 'studio', name: '攝影棚預約', subName: '自然光&背景紙', spec: '每小時 $850 (低消 2 小時)', price: 850 }
+    ];
+
     const watercolorOptions = [
       { id: 'wa', type: 'watercolor', name: '【水彩速寫體驗｜A款】', subName: '經典小風景', spec: '9 x 13 cm 水彩紙畫框', price: 699, drink: '附飲品一杯' },
       { id: 'wb', type: 'watercolor', name: '【水彩速寫體驗｜B款】', subName: '溫慢的陪伴', spec: '5.5 x 9 cm 壓克力磁鐵 x1 或 5 x 5 cm 壓克力磁鐵 x2', price: 750, drink: '附飲品一杯' },
@@ -267,11 +289,10 @@
       { id: 'be', type: 'beads_room', name: '手作別針串珠 DIY | E款', subName: '7-8 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2990, drink: '任選飲品 7-8 杯', time: '120min' }
     ];
 
-    const otherServices = [
-      { id: 'studio', name: '攝影棚預約', icon: 'camera', desc: '專業攝影空間，完善的器材與佈景', price: 0 }
-    ];
+    const otherServices = [];
 
-    const timeSlots = ["12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
+    // 攝影棚/包廂可選時段 (依需求調整)
+    const timeSlots = ["12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"];
     
     let bookedData = {}; 
 
@@ -288,15 +309,20 @@
     };
 
     function init() {
+        const stContainer = document.getElementById('studio-options');
+        studioOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'flex flex-col text-left p-4 rounded-2xl border border-[#e8e0d4] hover:bg-[#faf8f5] hover:border-[#2c2418] transition-all group';
+            btn.innerHTML = `<span class="text-[10px] font-bold text-[#8b7355] group-hover:text-[#2c2418]">${opt.name}</span><span class="text-sm font-bold text-[#2c2418] mt-1">${opt.subName}</span><span class="text-[10px] text-red-700 font-bold mt-1">NT$ ${opt.price} / hr</span>`;
+            btn.onclick = () => showDetailModal(opt);
+            stContainer.appendChild(btn);
+        });
+
         const wcContainer = document.getElementById('watercolor-options');
         watercolorOptions.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'flex flex-col text-left p-4 rounded-2xl border border-[#e8e0d4] hover:bg-[#faf8f5] hover:border-[#2c2418] transition-all group';
-            btn.innerHTML = `
-                <span class="text-[10px] font-bold text-[#8b7355] group-hover:text-[#2c2418]">${opt.name}</span>
-                <span class="text-sm font-bold text-[#2c2418] mt-1">${opt.subName}</span>
-                <span class="text-[10px] text-red-700 font-bold mt-1">NT$ ${opt.price}</span>
-            `;
+            btn.innerHTML = `<span class="text-[10px] font-bold text-[#8b7355] group-hover:text-[#2c2418]">${opt.name}</span><span class="text-sm font-bold text-[#2c2418] mt-1">${opt.subName}</span><span class="text-[10px] text-red-700 font-bold mt-1">NT$ ${opt.price}</span>`;
             btn.onclick = () => showDetailModal(opt);
             wcContainer.appendChild(btn);
         });
@@ -305,35 +331,11 @@
         beadsOptions.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'flex flex-col text-left p-4 rounded-2xl border border-[#e8e0d4] hover:bg-[#faf8f5] hover:border-[#2c2418] transition-all group';
-            btn.innerHTML = `
-                <span class="text-[10px] font-bold text-[#8b7355] group-hover:text-[#2c2418]">${opt.name}</span>
-                <span class="text-sm font-bold text-[#2c2418] mt-1">${opt.subName}</span>
-                <span class="text-[10px] text-red-700 font-bold mt-1">NT$ ${opt.price}</span>
-            `;
+            btn.innerHTML = `<span class="text-[10px] font-bold text-[#8b7355] group-hover:text-[#2c2418]">${opt.name}</span><span class="text-sm font-bold text-[#2c2418] mt-1">${opt.subName}</span><span class="text-[10px] text-red-700 font-bold mt-1">NT$ ${opt.price}</span>`;
             btn.onclick = () => showDetailModal(opt);
             beadContainer.appendChild(btn);
         });
 
-        const otherContainer = document.getElementById('other-services');
-        otherServices.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'service-card p-5 rounded-3xl cursor-pointer fade-in';
-            card.innerHTML = `
-                <div class="w-10 h-10 bg-[#fcfaf7] rounded-xl flex items-center justify-center mb-4">
-                    <i data-lucide="${s.icon}" class="w-5 h-5 text-[#8b7355]"></i>
-                </div>
-                <h3 class="font-bold text-sm mb-1">${s.name}</h3>
-                <p class="text-xs text-[#8b7355]">${s.desc}</p>
-            `;
-            card.onclick = () => {
-                state.service = s.name;
-                state.serviceType = 'other';
-                state.unitPrice = s.price;
-                showView('booking');
-                goToStep(1);
-            };
-            otherContainer.appendChild(card);
-        });
         renderCalendar();
         lucide.createIcons();
     }
@@ -341,70 +343,39 @@
     function showDetailModal(opt) {
         const content = document.getElementById('modal-body-content');
         
-        if (opt.type === 'watercolor') {
+        if (opt.type === 'studio') {
             content.innerHTML = `
                 <div class="pb-4">
-                    <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
-                    <p class="text-sm font-bold text-red-700 mt-1">單人費用：NT$ ${opt.price}</p>
-                    <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink}) - ${opt.spec}</p>
+                    <h2 class="text-lg font-bold text-[#2c2418]">${opt.name} (自然光&背景紙)</h2>
+                    <p class="text-xs text-[#8b7355] mt-2 leading-relaxed">時光造所是一個結合 空間租借、手作課程、選物店與輕食咖啡 的多功能複合式場域。為維護拍攝品質與雙方權益，預約前請詳閱條款。</p>
                 </div>
-                <div class="border-t pt-4">
-                    <h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
-                    <p class="text-[11px] leading-relaxed text-[#8b7355]">
-                        三三畫室黃老師曾任教於大學及社區大學多年，相信「每個人都能畫出心裡最美的風景」！<br>
-                        老師擅長細膩引導與因材施教，讓學習不再有壓力，即使零基礎，也能慢慢愛上畫畫，在創作裡找到屬於自己的節奏。<br>
-                        <a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline font-medium mt-1 inline-block">「三三畫室」粉絲專頁</a>
-                    </p>
-                </div>
-                <div class="border-t pt-4">
-                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
+                <div class="border-t pt-4 space-y-4">
+                    <h4 class="font-bold flex items-center gap-2 text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 預約流程與費用</h4>
                     <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                        <li># 不須預約一人即可上課；因位子有限，建議先預約比較保險</li>
-                        <li># 同一時段人數上限8人</li>
-                        <li># 提供數十種速寫範例選圖</li>
-                        <li># 預約須先付款，若當日無法前來，可保留名額擇日再約</li>
-                        <li># 套餐內含 $120 經典飲品，更換其他特調飲品僅需補差額</li>
+                        <li># 租借費用：$850/hr，低消 2 小時起</li>
+                        <li># 優惠說明：第 4 小時起(含)，每小時優惠 $800</li>
+                        <li># 人數限制：上限 6 人（含工作人員），超過每人加收 $200 (最多10人)</li>
+                        <li># 收音提醒：拍攝以平面為主，收音環境簡約</li>
+                        <li># 進場緩衝：12:30 無前置緩衝，其餘時段可提前 10 分鐘，結束有 15 分鐘收場緩衝</li>
                     </ul>
                 </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="gift" class="w-4 h-4"></i> 專屬優惠與器材</h4>
+                    <p class="text-[10px] text-[#8b7355]">預約當日享飲品 9 折 / 學生證送 $50 購物金。<br>提供 Godox 燈具、電動背景紙、化妝更衣間、掛燙機等免費使用。</p>
+                </div>
             `;
+        } else if (opt.type === 'watercolor') {
+            content.innerHTML = `<div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2><p class="text-sm font-bold text-red-700 mt-1">單人費用：NT$ ${opt.price}</p><p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink}) - ${opt.spec}</p></div><div class="border-t pt-4"><h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4><p class="text-[11px] leading-relaxed text-[#8b7355]">三三畫室黃老師曾任教於大學及社區大學多年...<br><a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline font-medium mt-1 inline-block">「三三畫室」粉絲專頁</a></p></div><div class="border-t pt-4"><h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4><ul class="text-[10px] space-y-1 text-[#8b7355] list-none"><li># 同一時段人數上限8人</li><li># 套餐內含 $120 經典飲品</li></ul></div>`;
         } else if (opt.type.includes('beads')) {
-            content.innerHTML = `
-                <div class="pb-4">
-                    <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
-                    <p class="text-sm font-bold text-red-700 mt-1">費用：NT$ ${opt.price}</p>
-                    <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink} | ${opt.time})</p>
-                </div>
-                <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mb-4">
-                    <h4 class="font-bold text-[#2c2418] mb-2 text-xs">【方案特色】</h4>
-                    <p class="text-[10px] text-[#8b7355] leading-relaxed">
-                        把對偶像的愛、對閨蜜的情誼，通通串進這枚精緻的別針裡。<br>
-                        ✦ 享受精緻飲品與悠閒氛圍。<br>
-                        ✦ 創意套餐：珠珠串到滿，贈送高級吊墜與緞帶。<br>
-                        ✦ 質感小禮物包裝：製作完成後提供透明包裝袋。
-                    </p>
-                </div>
-                <div class="border-t pt-4">
-                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 預約須知</h4>
-                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                        <li># 套餐外加購第二副起，另外計算</li>
-                        <li># 不須預約一人即可；建議先預約保留位置</li>
-                        <li># 一般座位上限 8 人；包廂派對專屬空間獨立計算</li>
-                    </ul>
-                </div>
-            `;
+            content.innerHTML = `<div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2><p class="text-sm font-bold text-red-700 mt-1">費用：NT$ ${opt.price}</p><p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink} | ${opt.time})</p></div><div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mb-4"><h4 class="font-bold text-[#2c2418] mb-2 text-xs">【方案特色】</h4><p class="text-[10px] text-[#8b7355] leading-relaxed">珠珠串到滿，贈送高級吊墜與緞帶。<br>提供質感透明包裝袋。</p></div>`;
         }
 
-        // 通用條款 (限定好禮與退改須知)
         content.innerHTML += `
-            <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mt-4">
-                <h4 class="font-bold text-[#2c2418] mb-2 text-xs flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 text-red-400"></i> ❤ 限定好禮 ❤</h4>
-                <p class="text-[10px] text-[#8b7355]">現場「打卡分享」並「首次加入官方 LINE」：每人現領 $50 選物店購物金！</p>
-            </div>
             <div class="border-t pt-4">
                 <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
                 <div class="text-[10px] space-y-2 text-[#8b7355]">
                     <p><b>【 預約付款 】</b> 採全額預付制，完成付款後方保留名額。</p>
-                    <p><b>【 退款政策 】</b> 預約日 2 天前取消可全額退費。2 天內恕不退費，僅限聯繫 IG @astimegoesby_handmade 改期一次。</p>
+                    <p><b>【 退款政策 】</b> 預約日 2 天前取消可全額退費。2 天內恕不退費，僅限改期一次。</p>
                     <p><b>【 準時入場 】</b> 時段固定，遲到恕不補時；未到視同放棄。</p>
                 </div>
             </div>
@@ -459,7 +430,7 @@
 
     function handleServiceChange(e) {
         const selectedId = e.target.value;
-        const allOptions = [...watercolorOptions, ...beadsOptions, ...otherServices];
+        const allOptions = [...studioOptions, ...watercolorOptions, ...beadsOptions];
         const selectedOption = allOptions.find(opt => opt.id === selectedId);
         if (selectedOption) {
             state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name;
@@ -470,9 +441,9 @@
 
     function renderServiceSelection() {
         const allServices = [
+            ...studioOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}/hr`, nameOnly: `${opt.name} ${opt.subName}` })),
             ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
-            ...beadsOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
-            ...otherServices.map(s => ({ id: s.id, label: `${s.name} - NT$ ${s.price}`, nameOnly: s.name }))
+            ...beadsOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` }))
         ];
         let optionsHtml = allServices.map(s => {
             const isSelected = (state.service === s.nameOnly) ? 'selected' : '';
@@ -496,16 +467,22 @@
     function getAvailableCapacity(date, time) {
         const daily = bookedData[date] || {};
         const idx = timeSlots.indexOf(time);
+        
+        // 基本人數容量
         let maxBooked = 0;
         [idx, idx-1, idx-2].forEach(i => {
             if(i >= 0) maxBooked = Math.max(maxBooked, daily[timeSlots[i]] || 0);
         });
         const seatLeft = 8 - maxBooked;
 
+        // 獨立包廂/攝影棚共用排他性
         let roomOccupied = false;
+        // 往前檢查與往後檢查 (包含清潔緩衝 1 小時)
+        // 往後預防：idx+1, idx+2 等若已被佔用，則不能預約。
         [idx-4, idx-3, idx-2, idx-1, idx, idx+1, idx+2, idx+3, idx+4].forEach(i => {
             if(i >= 0 && i < timeSlots.length) {
                 if(daily[timeSlots[i] + "_ROOM"]) roomOccupied = true;
+                if(daily[timeSlots[i] + "_STUDIO"]) roomOccupied = true;
             }
         });
         return { seatLeft, roomOccupied };
@@ -517,7 +494,14 @@
         const { seatLeft } = getAvailableCapacity(state.date, state.time);
         select.innerHTML = '';
         
-        if (state.serviceType === 'beads_room') {
+        if (state.serviceType === 'studio') {
+            label.innerText = "預約時數 * (最低 2 小時)";
+            for(let i=2; i<=6; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.innerText = `${i} 小時`;
+                select.appendChild(opt);
+            }
+        } else if (state.serviceType === 'beads_room') {
             label.innerText = "預約組數 * (包廂僅限 1 組)";
             const opt = document.createElement('option');
             opt.value = "1"; opt.innerText = "1 組";
@@ -541,11 +525,23 @@
     }
 
     function calculatePrice() {
-        const people = parseInt(document.getElementById('input-people').value) || 1;
-        state.totalPrice = state.unitPrice * people;
-        document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
-        const unitLabel = (state.serviceType.includes('room') || state.serviceType === 'beads_double') ? '組' : '人';
-        document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${people} ${unitLabel}`;
+        const val = parseInt(document.getElementById('input-people').value) || 1;
+        
+        if (state.serviceType === 'studio') {
+            // 攝影棚階梯計費：1-3hr 850, 4hr+ 800
+            if (val >= 4) {
+                state.totalPrice = val * 800;
+            } else {
+                state.totalPrice = val * 850;
+            }
+            document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
+            document.getElementById('price-detail-text').innerText = `明細：時薪 ${val >= 4 ? 800 : 850} × ${val} 小時`;
+        } else {
+            state.totalPrice = state.unitPrice * val;
+            document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
+            const unitLabel = (state.serviceType.includes('room') || state.serviceType === 'beads_double') ? '組' : '人';
+            document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${val} ${unitLabel}`;
+        }
     }
 
     function updateSummary() {
@@ -584,9 +580,11 @@
             const b = document.createElement('button');
             b.innerText = t;
             let isDisable = false;
-            if (state.serviceType === 'beads_room' && roomOccupied) isDisable = true;
+            
+            // 攝影棚與包廂派對排他性
+            if ((state.serviceType === 'studio' || state.serviceType === 'beads_room') && roomOccupied) isDisable = true;
             if (state.serviceType === 'beads_double' && seatLeft < 2) isDisable = true;
-            if (state.serviceType !== 'beads_room' && seatLeft <= 0) isDisable = true;
+            if (!state.serviceType.includes('room') && state.serviceType !== 'studio' && seatLeft <= 0) isDisable = true;
 
             if (isDisable) {
                 b.className = "time-slot py-3 text-xs border rounded-xl disabled";

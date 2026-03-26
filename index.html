@@ -62,7 +62,8 @@
         </button>
       </header>
 
-      <div class="px-4 pb-12 max-w-2xl mx-auto space-y-6">
+      <div class="px-4 pb-12 max-w-2xl mx-auto space-y-8">
+        <!-- 水彩速寫區塊 -->
         <div class="bg-white rounded-3xl border border-[#e8e0d4] p-6 shadow-sm overflow-hidden fade-in">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 bg-[#fcfaf7] rounded-xl flex items-center justify-center">
@@ -79,6 +80,25 @@
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="watercolor-options"></div>
         </div>
+
+        <!-- 手作串珠區塊 -->
+        <div class="bg-white rounded-3xl border border-[#e8e0d4] p-6 shadow-sm overflow-hidden fade-in">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-[#fcfaf7] rounded-xl flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-6 h-6 text-[#2c2418]"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold">手作別針串珠 DIY</h2>
+                    <p class="text-[10px] text-[#8b7355]">Handmade Beaded Brooch DIY</p>
+                </div>
+            </div>
+            <p class="text-xs text-[#8b7355] leading-relaxed mb-6 border-l-2 border-[#e8e0d4] pl-3">
+                珠珠串到滿，打造專屬您的創意飾品。<br>
+                把愛與情誼，通通串進這枚精緻的別針裡。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="beads-options"></div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="other-services"></div>
       </div>
     </section>
@@ -134,7 +154,7 @@
                             <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
                         </div>
                         <div id="time-section" class="mt-6 hidden pt-6 border-t border-dashed border-[#e8e0d4]">
-                            <label class="block text-sm font-bold mb-3">選擇預約時段 (教學時長90分鐘)</label>
+                            <label class="block text-sm font-bold mb-3">選擇預約時段</label>
                             <div id="time-slots" class="grid grid-cols-3 gap-2"></div>
                         </div>
                     </div>
@@ -240,14 +260,21 @@
     const SCRIPT_URL = "你的_GOOGLE_APPS_SCRIPT_網址";
 
     const watercolorOptions = [
-      { id: 'wa', name: '【水彩速寫體驗｜A款】', subName: '經典小風景', spec: '9 x 13 cm 水彩紙畫框', price: 699, drink: '附飲品一杯' },
-      { id: 'wb', name: '【水彩速寫體驗｜B款】', subName: '溫暖的陪伴', spec: '5.5 x 9 cm 壓克力磁鐵 x1 或 5 x 5 cm 壓克力磁鐵 x2', price: 750, drink: '附飲品一杯' },
-      { id: 'wc', name: '【熱銷！水彩速寫體驗｜C款】', subName: '完美典藏', spec: '9.5 x 12 cm 壓克力磁鐵', price: 799, drink: '附飲品一杯' },
-      { id: 'wd', name: '【水彩速寫體驗｜D款】', subName: '完整創作款', spec: '13.5 x 20 cm 水彩紙', price: 899, drink: '附飲品一杯' }
+      { id: 'wa', type: 'watercolor', name: '【水彩速寫體驗｜A款】', subName: '經典小風景', spec: '9 x 13 cm 水彩紙畫框', price: 699, drink: '附飲品一杯' },
+      { id: 'wb', type: 'watercolor', name: '【水彩速寫體驗｜B款】', subName: '溫暖的陪伴', spec: '5.5 x 9 cm 壓克力磁鐵 x1 或 5 x 5 cm 壓克力磁鐵 x2', price: 750, drink: '附飲品一杯' },
+      { id: 'wc', type: 'watercolor', name: '【熱銷！水彩速寫體驗｜C款】', subName: '完美典藏', spec: '9.5 x 12 cm 壓克力磁鐵', price: 799, drink: '附飲品一杯' },
+      { id: 'wd', type: 'watercolor', name: '【水彩速寫體驗｜D款】', subName: '完整創作款', spec: '13.5 x 20 cm 水彩紙', price: 899, drink: '附飲品一杯' }
+    ];
+
+    const beadsOptions = [
+      { id: 'ba', type: 'beads', name: '手作別針串珠 DIY | A款', subName: '單人套餐', spec: '珠珠串到滿 + 贈2高級珠珠/吊墜 + 精緻細款緞帶', price: 190, drink: '飲品 1 杯', time: '60min' },
+      { id: 'bb', type: 'beads', name: '手作別針串珠 DIY | B款', subName: '精緻單人午茶套餐', spec: '珠珠串到滿 + 贈2高級珠珠/吊墜 + 精緻細款緞帶', price: 299, drink: '飲品 1 杯', time: '90min' },
+      { id: 'bc', type: 'beads', name: '手作別針串珠 DIY | C款', subName: '雙人午後時光套餐', spec: '雙人串到滿 + 贈4高級珠珠/吊墜 + 精緻細款緞帶', price: 550, drink: '飲品 2 杯', time: '90min' },
+      { id: 'bd', type: 'beads', name: '手作別針串珠 DIY | D款', subName: '5-6 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2290, drink: '任選飲品 5-6 杯', time: '120min' },
+      { id: 'be', type: 'beads', name: '手作別針串珠 DIY | E款', subName: '7-8 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2990, drink: '任選飲品 7-8 杯', time: '120min' }
     ];
 
     const otherServices = [
-      { id: 'beads', name: '手作別針串珠 DIY', icon: 'sparkles', desc: '創意手作，做出獨一無二的飾品', price: 0 },
       { id: 'studio', name: '攝影棚預約', icon: 'camera', desc: '專業攝影空間，完善的器材與佈景', price: 0 }
     ];
 
@@ -267,6 +294,7 @@
     };
 
     function init() {
+        // 渲染水彩
         const wcContainer = document.getElementById('watercolor-options');
         watercolorOptions.forEach(opt => {
             const btn = document.createElement('button');
@@ -278,6 +306,20 @@
             `;
             btn.onclick = () => showDetailModal(opt);
             wcContainer.appendChild(btn);
+        });
+
+        // 渲染串珠
+        const beadContainer = document.getElementById('beads-options');
+        beadsOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'flex flex-col text-left p-4 rounded-2xl border border-[#e8e0d4] hover:bg-[#faf8f5] hover:border-[#2c2418] transition-all group';
+            btn.innerHTML = `
+                <span class="text-[10px] font-bold text-[#8b7355] group-hover:text-[#2c2418]">${opt.name}</span>
+                <span class="text-sm font-bold text-[#2c2418] mt-1">${opt.subName}</span>
+                <span class="text-[10px] text-red-700 font-bold mt-1">NT$ ${opt.price}</span>
+            `;
+            btn.onclick = () => showDetailModal(opt);
+            beadContainer.appendChild(btn);
         });
 
         const otherContainer = document.getElementById('other-services');
@@ -295,7 +337,7 @@
                 state.service = s.name;
                 state.unitPrice = s.price;
                 showView('booking');
-                goToStep(1); // 確保從首頁進入時正確停在第一步渲染選單
+                goToStep(1);
             };
             otherContainer.appendChild(card);
         });
@@ -305,60 +347,78 @@
 
     function showDetailModal(opt) {
         const content = document.getElementById('modal-body-content');
-        content.innerHTML = `
-            <div class="pb-4">
-                <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
-                <p class="text-sm font-bold text-red-700 mt-1">單人費用：NT$ ${opt.price}</p>
-                <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink}) - ${opt.spec}</p>
-            </div>
+        
+        if (opt.type === 'watercolor') {
+            content.innerHTML = `
+                <div class="pb-4">
+                    <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
+                    <p class="text-sm font-bold text-red-700 mt-1">單人費用：NT$ ${opt.price}</p>
+                    <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink}) - ${opt.spec}</p>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
+                    <p class="text-[11px] leading-relaxed text-[#8b7355]">三三畫室黃老師曾任教於大學及社區大學多年...</p>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
+                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
+                        <li># 不須預約一人即可上課</li>
+                        <li># 同一時段人數上限8人</li>
+                    </ul>
+                </div>
+            `;
+        } else if (opt.type === 'beads') {
+            content.innerHTML = `
+                <div class="pb-4">
+                    <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
+                    <p class="text-sm font-bold text-red-700 mt-1">費用：NT$ ${opt.price}</p>
+                    <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink} | ${opt.time})</p>
+                </div>
+                <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mb-4">
+                    <h4 class="font-bold text-[#2c2418] mb-2 text-xs">【精緻午茶套餐內容】</h4>
+                    <p class="text-[10px] text-[#8b7355] leading-relaxed">
+                        把對偶像的愛、對閨蜜的情誼、對另一半的告白，通通串進這枚精緻的別針裡。<br>
+                        ✦ 一盞茶的時間：享受精緻飲品與悠閒氛圍。<br>
+                        ✦ 套餐無限的創意：每人任選別針、鑰匙圈各 1 個；紅藍區基礎珠珠串到滿。每人加贈「黃綠區」高級吊墜任選 1 個！<br>
+                        ✦ 質感小禮物包裝袋：我們將免費提供質感透明包裝袋，擁有開箱禮物般的儀式感。
+                    </p>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 預約須知</h4>
+                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
+                        <li># 套餐外加購第二副起，另外計算。</li>
+                        <li># 不須預約一人即可；因位子有限，建議先預約比較保險。</li>
+                        <li># 同一時段人數上限 8 人 (包廂除外)。</li>
+                        <li># 因系統關係，一次只能預約一人，如有多人預約請分次下單。</li>
+                        <li># 預約請先付款，收到確認信即完成預約。</li>
+                    </ul>
+                </div>
+            `;
+        }
 
-            <div class="border-t pt-4">
-                <h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
-                <p class="text-[11px] leading-relaxed text-[#8b7355]">
-                    三三畫室黃老師曾任教於大學及社區大學多年，相信「每個人都能畫出心裡最美的風景」！<br>
-                    老師擅長細膩引導與因材施教，讓學習不再有壓力，即使零基礎，也能慢慢愛上畫畫，在創作裡找到屬於自己的節奏。<br>
-                    <a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline font-medium mt-1 inline-block">「三三畫室」粉絲專頁</a>
-                </p>
-            </div>
-
-            <div class="border-t pt-4">
-                <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
-                <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                    <li># 不須預約一人即可上課；因位子有限，建議先預約比較保險</li>
-                    <li># 同一時段人數上限8人</li>
-                    <li># 提供數十種速寫範例選圖（花草／風景／甜點／建築／人物／動物／生活雜貨等）</li>
-                    <li># 預約須先付款，若當日無法前來，可保留名額擇日再約。</li>
-                    <li># 因系統關係，一次只能預約一人，如有多人預約請分次下單，造成不便請見諒。</li>
-                    <li># 套餐內含 $120 經典飲品，更換其他特調飲品僅需補差額即可享有。</li>
-                </ul>
-            </div>
-
+        // 通用條款
+        content.innerHTML += `
             <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4]">
                 <h4 class="font-bold text-[#2c2418] mb-2 text-xs flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 text-red-400"></i> ❤ 限定好禮 ❤</h4>
-                <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                    <li># 預約手作體驗套餐，現場「打卡分享」並「首次加入官方 LINE」： 每人現場領取 $50 元時光造所選物店購物金！( 免低消、可立刻折抵選物店商品)</li>
-                    <li># 12歲以下小朋友：贈送夾娃娃 2 次</li>
-                </ul>
+                <p class="text-[10px] text-[#8b7355]">預約手作體驗套餐，現場「打卡分享」並「首次加入官方 LINE」： 每人現場領取 $50 元時光造所選物店購物金！</p>
             </div>
-
             <div class="border-t pt-4">
                 <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
                 <div class="text-[10px] space-y-2 text-[#8b7355]">
                     <p><b>【 預約付款 】</b> 本店採全額預付制，完成付款後方保留名額或時段。</p>
                     <p><b>【 全額退款 】</b> 預約日 2 天前可自行於系統取消，將提供全額退費。</p>
-                    <p><b>【 預約 2 天內 】</b> 系統將自動關閉取消功能：恕不接受退費。僅限聯繫 IG @astimegoesby_handmade 更改日期一次（須於 3 個月內使用完畢）。</p>
-                    <p><b>【 天災政策 】</b> 如遇颱風等天災，以新北市政府公告停班停課為準，當日預約可全額退費或改期。</p>
-                    <p><b>【 準時入場 】</b> 預約時段固定，遲到恕不補時；無故未到視同放棄，不予退費或改期。</p>
+                    <p><b>【 預約 2 天內 】</b> 系統將自動關閉取消功能：恕不接受退費。僅限聯繫 IG @astimegoesby_handmade 更改日期一次。</p>
                 </div>
             </div>
         `;
+
         const btn = document.getElementById('modal-confirm-btn');
         btn.onclick = () => {
-            state.service = `${opt.name} ${opt.subName}`;
+            state.service = opt.subName ? `${opt.name} ${opt.subName}` : opt.name;
             state.unitPrice = opt.price;
             closeDetailModal();
             showView('booking');
-            goToStep(1); // 跳轉到第一步顯示選單
+            goToStep(1);
         };
         document.getElementById('detail-modal').classList.remove('hidden');
         lucide.createIcons();
@@ -398,7 +458,7 @@
 
     function handleServiceChange(e) {
         const selectedId = e.target.value;
-        const allOptions = [...watercolorOptions, ...otherServices];
+        const allOptions = [...watercolorOptions, ...beadsOptions, ...otherServices];
         const selectedOption = allOptions.find(opt => opt.id === selectedId);
         
         if (selectedOption) {
@@ -410,6 +470,7 @@
     function renderServiceSelection() {
         const allServices = [
             ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
+            ...beadsOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
             ...otherServices.map(s => ({ id: s.id, label: `${s.name} - NT$ ${s.price}`, nameOnly: s.name }))
         ];
 

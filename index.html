@@ -395,13 +395,38 @@
         }
     }
 
+    function handleServiceChange(e) {
+        const selectedId = e.target.value;
+        const allOptions = [...watercolorOptions, ...otherServices];
+        const selectedOption = allOptions.find(opt => opt.id === selectedId || opt.name === selectedId);
+        
+        if (selectedOption) {
+            state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name;
+            state.unitPrice = selectedOption.price;
+        }
+    }
+
     function renderServiceSelection() {
+        const allServices = [
+            ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}` })),
+            ...otherServices.map(s => ({ id: s.id, label: `${s.name} - NT$ ${s.price}` }))
+        ];
+
+        let optionsHtml = allServices.map(s => {
+            const isSelected = (state.service && state.service.includes(s.label.split(' - ')[0])) ? 'selected' : '';
+            return `<option value="${s.id}" ${isSelected}>${s.label}</option>`;
+        }).join('');
+
         document.getElementById('service-options').innerHTML = `
-            <div class="p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] flex items-center justify-between">
-                <span class="text-sm font-bold">${state.service}</span>
-                <i data-lucide="check-circle-2" class="w-5 h-5 text-[#2c2418]"></i>
+            <div class="relative">
+                <select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">
+                    ${optionsHtml}
+                </select>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i>
+                </div>
             </div>
-            <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold">下一步</button>
+            <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold transition-all active:scale-[0.98] shadow-md">下一步</button>
         `;
         lucide.createIcons();
     }
@@ -415,7 +440,7 @@
 
     function updateSummary() {
         document.getElementById('confirm-box').innerHTML = `
-            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold">${state.service}</span></div>
+            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right">${state.service}</span></div>
             <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
         `;
     }
@@ -450,14 +475,12 @@
         const container = document.getElementById('time-slots');
         container.innerHTML = '';
         
-        // 取得該日預約狀況
         const dailyBookings = bookedData[state.date] || {};
 
         timeSlots.forEach((t, index) => {
             const b = document.createElement('button');
             b.innerText = t;
             
-            // 檢查該時段是否被 90 分鐘內的預約佔滿
             let isFull = false;
             const checkIndices = [index, index - 1, index - 2];
             

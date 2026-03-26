@@ -26,8 +26,9 @@
     .nav-dot.active { background: #2c2418; transform: scale(1.3); }
     .toast-enter { animation: toastIn 0.4s ease forwards; }
     @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    /* 付款彈窗樣式 */
-    #payment-modal { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+    /* 付款與詳情彈窗樣式 */
+    #payment-modal, #detail-modal { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+    .modal-content { max-height: 85vh; overflow-y: auto; }
   </style>
 </head>
 <body class="h-full">
@@ -64,6 +65,17 @@
         <div class="grid grid-cols-1 gap-4" id="services-grid"></div>
       </div>
     </section>
+
+    <!-- 方案詳情彈窗 -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg p-6 slide-up modal-content relative">
+            <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-gray-400"><i data-lucide="x"></i></button>
+            <div id="modal-body-content" class="space-y-6 text-sm">
+                <!-- 動態注入內容 -->
+            </div>
+            <button id="modal-confirm-btn" class="w-full mt-8 py-4 bg-[#2c2418] text-white rounded-xl font-bold shadow-lg">立即預約</button>
+        </div>
+    </div>
 
     <section id="view-booking" class="hidden px-4 py-8">
         <div class="max-w-md mx-auto">
@@ -212,11 +224,42 @@
   </div>
 
   <script>
-    // --- 重要：請在此填入你的 Google Apps Script 網址 ---
     const SCRIPT_URL = "你的_GOOGLE_APPS_SCRIPT_網址";
 
+    // 更新服務定義：將水彩體驗拆分為四個方案
     const services = [
-      { id: 'watercolor', name: '水彩速寫體驗', icon: 'palette', desc: '靜靜地啜飲時光，讓顏色與生活一起沉澱' },
+      { 
+        id: 'watercolor-a', 
+        name: '水彩速寫體驗｜A款（附飲品一杯）', 
+        icon: 'palette', 
+        desc: '經典小風景｜9 x 13 cm 水彩紙畫框',
+        isWatercolor: true,
+        intro: '在專業老師的引導下，零基礎也能輕鬆作畫！靜靜地啜飲時光，讓顏色與生活一起沉澱。'
+      },
+      { 
+        id: 'watercolor-b', 
+        name: '水彩速寫體驗｜B款（附飲品一杯）', 
+        icon: 'palette', 
+        desc: '溫暖的陪伴｜5.5 x 9 cm 壓克力磁鐵 x1 或 5 x 5 cm 壓克力磁鐵 x2',
+        isWatercolor: true,
+        intro: '在專業老師的引導下，零基礎也能輕鬆作畫！靜靜地啜飲時光，讓顏色與生活一起沉澱。'
+      },
+      { 
+        id: 'watercolor-c', 
+        name: '【熱銷！】水彩速寫體驗｜C款（附飲品一杯）', 
+        icon: 'palette', 
+        desc: '完美典藏（熱銷款）｜9.5 x 12 cm 壓克力磁鐵',
+        isWatercolor: true,
+        intro: '在專業老師的引導下，零基礎也能輕鬆作畫！靜靜地啜飲時光，讓顏色與生活一起沉澱。'
+      },
+      { 
+        id: 'watercolor-d', 
+        name: '水彩速寫體驗｜D款（附飲品一杯）', 
+        icon: 'palette', 
+        desc: '完整創作款｜13.5 x 20 cm 水彩紙',
+        isWatercolor: true,
+        intro: '在專業老師的引導下，零基礎也能輕鬆作畫！靜靜地啜飲時光，讓顏色與生活一起沉澱。'
+      },
       { id: 'beads', name: '手作別針串珠 DIY', icon: 'sparkles', desc: '創意手作，做出獨一無二的飾品' },
       { id: 'studio', name: '攝影棚預約', icon: 'camera', desc: '專業攝影空間，完善的器材與佈景' }
     ];
@@ -240,17 +283,84 @@
                     <i data-lucide="${s.icon}" class="w-5 h-5 text-[#8b7355]"></i>
                 </div>
                 <h3 class="font-bold text-sm mb-1">${s.name}</h3>
-                <p class="text-xs text-[#8b7355]">${s.desc}</p>
+                <p class="text-xs text-[#8b7355] mb-2">${s.desc}</p>
+                ${s.isWatercolor ? `<p class="text-[10px] text-gray-400 italic">點擊查看詳情與規則</p>` : ''}
             `;
             card.onclick = () => {
-                state.service = s.name;
-                showView('booking');
-                goToStep(2);
+                if(s.isWatercolor) {
+                    showDetailModal(s);
+                } else {
+                    state.service = s.name;
+                    showView('booking');
+                    goToStep(2);
+                }
             };
             grid.appendChild(card);
         });
         renderCalendar();
         lucide.createIcons();
+    }
+
+    // --- 詳情彈窗控制 ---
+    function showDetailModal(service) {
+        const content = document.getElementById('modal-body-content');
+        content.innerHTML = `
+            <div>
+                <h2 class="text-lg font-bold text-[#2c2418] mb-2">${service.name}</h2>
+                <p class="text-[#8b7355] leading-relaxed">${service.intro}</p>
+            </div>
+            <div class="border-t pt-4">
+                <h3 class="font-bold text-[#2c2418] mb-2 flex items-center gap-1"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h3>
+                <p class="text-xs leading-relaxed text-[#8b7355]">
+                    三三畫室黃老師曾任教於大學及社區大學多年，相信「每個人都能畫出心裡最美的風景」！<br>
+                    老師擅長細膩引導與因材施教，讓學習不再有壓力，即使零基礎，也能慢慢愛上畫畫，在創作裡找到屬於自己的節奏。<br>
+                    <a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline">「三三畫室」粉絲專頁</a>
+                </p>
+            </div>
+            <div class="border-t pt-4">
+                <h3 class="font-bold text-[#2c2418] mb-2 flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h3>
+                <ul class="text-xs space-y-1 text-[#8b7355] list-none">
+                    <li># 不須預約一人即可上課；因位子有限，建議先預約比較保險</li>
+                    <li># 同一時段人數上限8人</li>
+                    <li># 提供數十種速寫範例選圖（花草／風景／甜點／建築／人物／動物／生活雜貨等）</li>
+                    <li># 預約須先付款，若當日無法前來，可保留名額擇日再約。</li>
+                    <li># 因系統關係，一次只能預約一人，如有多人預約請分次下單。</li>
+                    <li># 套餐內含 $120 經典飲品，更換其他特調飲品僅需補差額。</li>
+                </ul>
+            </div>
+            <div class="bg-[#fcfaf7] p-3 rounded-xl border border-[#e8e0d4]">
+                <h3 class="font-bold text-[#2c2418] mb-2 flex items-center gap-1"><i data-lucide="gift" class="w-4 h-4 text-red-400"></i> ❤ 限定好禮 ❤</h3>
+                <ul class="text-[11px] space-y-1 text-[#8b7355]">
+                    <li># 預約手作體驗套餐，現場「打卡分享」並「首次加入官方 LINE」：每人現領 $50 元時光造所選物店購物金！</li>
+                    <li># 12歲以下小朋友：贈送夾娃娃 2 次</li>
+                </ul>
+            </div>
+            <div class="border-t pt-4">
+                <h3 class="font-bold text-red-600 mb-2 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h3>
+                <div class="text-[11px] space-y-2 text-[#8b7355]">
+                    <p><b>【 預約付款 】</b> 本店採全額預付制，完成付款後方保留名額或時段。</p>
+                    <p><b>【 全額退款 】</b> 預約日 2 天前可自行於系統取消，將提供全額退費。</p>
+                    <p><b>【 預約 2 天內 】</b> 恕不接受退費。僅限聯繫 IG @astimegoesby_handmade 更改日期一次。</p>
+                    <p><b>【 天災政策 】</b> 如遇颱風天災，依政府公告停班課為準，可全額退費或改期。</p>
+                    <p><b>【 準時入場 】</b> 預約時段固定，遲到恕不補時；無故未到視同放棄。</p>
+                </div>
+            </div>
+        `;
+        
+        const btn = document.getElementById('modal-confirm-btn');
+        btn.onclick = () => {
+            state.service = service.name;
+            closeDetailModal();
+            showView('booking');
+            goToStep(2);
+        };
+        
+        document.getElementById('detail-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detail-modal').classList.add('hidden');
     }
 
     function showView(view) {
@@ -314,7 +424,6 @@
         });
     }
 
-    // --- 金流彈窗控制 ---
     function showPaymentModal() {
         document.getElementById('payment-modal').classList.remove('hidden');
     }
@@ -322,7 +431,6 @@
         document.getElementById('payment-modal').classList.add('hidden');
     }
 
-    // --- 執行付款與資料上傳 ---
     async function executePayment(method) {
         closePaymentModal();
         const name = document.getElementById('input-name').value;
@@ -333,7 +441,6 @@
 
         showToast(`正在發起 ${method} 付款...`, 'success');
 
-        // 整理資料傳送到 Google Sheet
         const formData = new FormData();
         formData.append('name', name);
         formData.append('phone', phone);
@@ -346,12 +453,10 @@
         formData.append('payment_method', method);
 
         try {
-            // 發送到 Google Apps Script (使用 fetch)
             if(SCRIPT_URL !== "你的_GOOGLE_APPS_SCRIPT_網址") {
                 fetch(SCRIPT_URL, { method: 'POST', body: formData });
             }
             
-            // 模擬金流成功後的結果
             setTimeout(() => {
                 alert(`付款成功！\n\n已預約完成，請至 ${email} 收信查看預約確認。`);
                 location.reload();

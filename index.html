@@ -373,13 +373,27 @@
             </div>`;
 
         const btn = document.getElementById('modal-confirm-btn');
-        btn.onclick = () => { state.service = opt.subName ? `${opt.name} ${opt.subName}` : opt.name; state.serviceType = opt.type; state.unitPrice = opt.price; closeDetailModal(); showView('booking'); goToStep(1); };
+        btn.onclick = () => { 
+            state.service = opt.subName ? `${opt.name} ${opt.subName}` : opt.name; 
+            state.serviceType = opt.type; 
+            state.unitPrice = opt.price; 
+            closeDetailModal(); 
+            showView('booking'); 
+            goToStep(1); 
+        };
         document.getElementById('detail-modal').classList.remove('hidden');
         lucide.createIcons();
     }
 
     function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
-    function showView(view) { state.view = view; ['home', 'booking', 'info', 'records'].forEach(v => { document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view); document.getElementById(`dot-${v}`).classList.toggle('active', v === view); }); window.scrollTo(0,0); }
+    function showView(view) { 
+        state.view = view; 
+        ['home', 'booking', 'info', 'records'].forEach(v => { 
+            document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view); 
+            document.getElementById(`dot-${v}`).classList.toggle('active', v === view); 
+        }); 
+        window.scrollTo(0,0); 
+    }
 
     function goToStep(step) {
         state.step = step;
@@ -399,7 +413,11 @@
         const selectedId = e.target.value;
         const allOptions = [...studioOptions, ...watercolorOptions, ...beadsOptions];
         const selectedOption = allOptions.find(opt => opt.id === selectedId);
-        if (selectedOption) { state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name; state.serviceType = selectedOption.type; state.unitPrice = selectedOption.price; }
+        if (selectedOption) { 
+            state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name; 
+            state.serviceType = selectedOption.type; 
+            state.unitPrice = selectedOption.price; 
+        }
     }
 
     function renderServiceSelection() {
@@ -408,9 +426,36 @@
             ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
             ...beadsOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` }))
         ];
-        let optionsHtml = allServices.map(s => { const isSelected = (state.service === s.nameOnly) ? 'selected' : ''; return `<option value="${s.id}" ${isSelected}>${s.label}</option>`; }).join('');
-        document.getElementById('service-options').innerHTML = `<div class="relative"><select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">${optionsHtml}</select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"><i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i></div></div><button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold shadow-md">下一步</button>`;
-        lucide.createIcons();
+        
+        let optionsHtml = allServices.map(s => { 
+            // 如果 state.service 已經有值（從詳情彈窗或下拉選單來的），就將其設為預選
+            const isSelected = (state.service === s.nameOnly) ? 'selected' : ''; 
+            return `<option value="${s.id}" ${isSelected}>${s.label}</option>`; 
+        }).join('');
+
+        const container = document.getElementById('service-options');
+        if (container) {
+            container.innerHTML = `
+                <div class="relative">
+                    <select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">
+                        ${optionsHtml}
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i>
+                    </div>
+                </div>
+                <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold shadow-md transition-all active:scale-[0.98]">下一步</button>
+            `;
+            lucide.createIcons();
+            
+            // 點擊下一步前，如果 state.service 為空，預設選擇第一個
+            if (!state.service && allServices.length > 0) {
+                const first = [...studioOptions, ...watercolorOptions, ...beadsOptions][0];
+                state.service = first.subName ? `${first.name} ${first.subName}` : first.name;
+                state.serviceType = first.type;
+                state.unitPrice = first.price;
+            }
+        }
     }
 
     function getAvailableCapacity(date, time) {
@@ -451,7 +496,8 @@
         } else {
             state.totalPrice = state.unitPrice * val;
             document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
-            document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${val} 人`;
+            const unitLabel = (state.serviceType.includes('room') || state.serviceType === 'beads_double') ? '組' : '人';
+            document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${val} ${unitLabel}`;
         }
     }
 
@@ -496,7 +542,6 @@
         const phone = document.getElementById('input-phone').value;
         const email = document.getElementById('input-email').value;
 
-        // 如果是攝影棚預約且選擇信用卡付款，跳轉到訂金頁面
         if (state.serviceType === 'studio' && method === 'Credit Card') {
             showToast("正在跳轉至攝影棚訂金支付頁面...");
             setTimeout(() => { window.location.href = STUDIO_PAYMENT_URL; }, 1500);

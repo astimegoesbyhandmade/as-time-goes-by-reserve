@@ -273,7 +273,6 @@
 
     const timeSlots = ["12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
     
-    // 模擬已預約資料：格式 { "日期": { "時段": 座位數, "時段_ROOM": 1 } }
     let bookedData = {}; 
 
     let state = {
@@ -341,6 +340,7 @@
 
     function showDetailModal(opt) {
         const content = document.getElementById('modal-body-content');
+        
         if (opt.type === 'watercolor') {
             content.innerHTML = `
                 <div class="pb-4">
@@ -350,10 +350,24 @@
                 </div>
                 <div class="border-t pt-4">
                     <h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
-                    <p class="text-[11px] leading-relaxed text-[#8b7355]">三三畫室黃老師曾任教於大學及社區大學多年...</p>
+                    <p class="text-[11px] leading-relaxed text-[#8b7355]">
+                        三三畫室黃老師曾任教於大學及社區大學多年，相信「每個人都能畫出心裡最美的風景」！<br>
+                        老師擅長細膩引導與因材施教，讓學習不再有壓力，即使零基礎，也能慢慢愛上畫畫，在創作裡找到屬於自己的節奏。<br>
+                        <a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline font-medium mt-1 inline-block">「三三畫室」粉絲專頁</a>
+                    </p>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
+                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
+                        <li># 不須預約一人即可上課；因位子有限，建議先預約比較保險</li>
+                        <li># 同一時段人數上限8人</li>
+                        <li># 提供數十種速寫範例選圖</li>
+                        <li># 預約須先付款，若當日無法前來，可保留名額擇日再約</li>
+                        <li># 套餐內含 $120 經典飲品，更換其他特調飲品僅需補差額</li>
+                    </ul>
                 </div>
             `;
-        } else {
+        } else if (opt.type.includes('beads')) {
             content.innerHTML = `
                 <div class="pb-4">
                     <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
@@ -361,19 +375,38 @@
                     <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink} | ${opt.time})</p>
                 </div>
                 <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mb-4">
-                    <h4 class="font-bold text-[#2c2418] mb-2 text-xs">【套餐內容】</h4>
+                    <h4 class="font-bold text-[#2c2418] mb-2 text-xs">【方案特色】</h4>
                     <p class="text-[10px] text-[#8b7355] leading-relaxed">
-                        珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶。質感包裝，儀式感十足！
+                        把對偶像的愛、對閨蜜的情誼，通通串進這枚精緻的別針裡。<br>
+                        ✦ 享受精緻飲品與悠閒氛圍。<br>
+                        ✦ 創意套餐：珠珠串到滿，贈送高級吊墜與緞帶。<br>
+                        ✦ 質感小禮物包裝：製作完成後提供透明包裝袋。
                     </p>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 預約須知</h4>
+                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
+                        <li># 套餐外加購第二副起，另外計算</li>
+                        <li># 不須預約一人即可；建議先預約保留位置</li>
+                        <li># 一般座位上限 8 人；包廂派對專屬空間獨立計算</li>
+                    </ul>
                 </div>
             `;
         }
 
-        // 通用規則
+        // 通用條款 (限定好禮與退改須知)
         content.innerHTML += `
+            <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mt-4">
+                <h4 class="font-bold text-[#2c2418] mb-2 text-xs flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 text-red-400"></i> ❤ 限定好禮 ❤</h4>
+                <p class="text-[10px] text-[#8b7355]">現場「打卡分享」並「首次加入官方 LINE」：每人現領 $50 選物店購物金！</p>
+            </div>
             <div class="border-t pt-4">
-                <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約須知</h4>
-                <p class="text-[10px] text-[#8b7355]">包廂專案獨立計算，一般專案共用8席座位。預約後不接受退費，僅限改期一次。</p>
+                <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
+                <div class="text-[10px] space-y-2 text-[#8b7355]">
+                    <p><b>【 預約付款 】</b> 採全額預付制，完成付款後方保留名額。</p>
+                    <p><b>【 退款政策 】</b> 預約日 2 天前取消可全額退費。2 天內恕不退費，僅限聯繫 IG @astimegoesby_handmade 改期一次。</p>
+                    <p><b>【 準時入場 】</b> 時段固定，遲到恕不補時；未到視同放棄。</p>
+                </div>
             </div>
         `;
 
@@ -460,11 +493,8 @@
         }
     }
 
-    // 計算剩餘座位與包廂可用性
     function getAvailableCapacity(date, time) {
         const daily = bookedData[date] || {};
-        
-        // 一般座位：檢查前後一個半小時內的最高佔用
         const idx = timeSlots.indexOf(time);
         let maxBooked = 0;
         [idx, idx-1, idx-2].forEach(i => {
@@ -472,22 +502,19 @@
         });
         const seatLeft = 8 - maxBooked;
 
-        // 包廂：檢查前後 2.5 小時 (前後 5 個時段，因為 1 個時段 30 分)
         let roomOccupied = false;
         [idx-4, idx-3, idx-2, idx-1, idx, idx+1, idx+2, idx+3, idx+4].forEach(i => {
             if(i >= 0 && i < timeSlots.length) {
                 if(daily[timeSlots[i] + "_ROOM"]) roomOccupied = true;
             }
         });
-
         return { seatLeft, roomOccupied };
     }
 
     function updatePeopleOptions() {
         const select = document.getElementById('input-people');
         const label = document.getElementById('people-label');
-        const { seatLeft, roomOccupied } = getAvailableCapacity(state.date, state.time);
-        
+        const { seatLeft } = getAvailableCapacity(state.date, state.time);
         select.innerHTML = '';
         
         if (state.serviceType === 'beads_room') {
@@ -495,8 +522,7 @@
             const opt = document.createElement('option');
             opt.value = "1"; opt.innerText = "1 組";
             select.appendChild(opt);
-        } 
-        else if (state.serviceType === 'beads_double') {
+        } else if (state.serviceType === 'beads_double') {
             label.innerText = `預約組數 * (剩餘可約 ${Math.floor(seatLeft/2)} 組)`;
             const maxGroups = Math.min(3, Math.floor(seatLeft / 2));
             for(let i=1; i<=maxGroups; i++) {
@@ -504,8 +530,7 @@
                 opt.value = i; opt.innerText = `${i} 組`;
                 select.appendChild(opt);
             }
-        } 
-        else {
+        } else {
             label.innerText = `預約人數 * (剩餘可約 ${seatLeft} 人)`;
             for(let i=1; i<=seatLeft; i++) {
                 const opt = document.createElement('option');
@@ -544,12 +569,7 @@
             const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             btn.innerText = d;
             btn.className = `w-full aspect-square text-xs rounded-xl transition-all ${state.date === dStr ? 'bg-[#2c2418] text-white shadow-md' : 'hover:bg-gray-100'}`;
-            btn.onclick = () => { 
-                state.date = dStr; 
-                renderCalendar(); 
-                document.getElementById('time-section').classList.remove('hidden'); 
-                renderTimes(); 
-            };
+            btn.onclick = () => { state.date = dStr; renderCalendar(); document.getElementById('time-section').classList.remove('hidden'); renderTimes(); };
             grid.appendChild(btn);
         }
     }
@@ -563,7 +583,6 @@
             const { seatLeft, roomOccupied } = getAvailableCapacity(state.date, t);
             const b = document.createElement('button');
             b.innerText = t;
-            
             let isDisable = false;
             if (state.serviceType === 'beads_room' && roomOccupied) isDisable = true;
             if (state.serviceType === 'beads_double' && seatLeft < 2) isDisable = true;
@@ -574,11 +593,7 @@
                 b.disabled = true;
             } else {
                 b.className = `time-slot py-3 text-xs border rounded-xl font-bold transition-all ${state.time === t ? 'bg-[#2c2418] text-white border-[#2c2418]' : 'border-[#e8e0d4]'}`;
-                b.onclick = () => { 
-                    state.time = t; renderTimes(); 
-                    document.getElementById('btn-to-step3').disabled = false;
-                    document.getElementById('btn-to-step3').classList.remove('opacity-50'); 
-                };
+                b.onclick = () => { state.time = t; renderTimes(); document.getElementById('btn-to-step3').disabled = false; document.getElementById('btn-to-step3').classList.remove('opacity-50'); };
             }
             container.appendChild(b);
         });
@@ -589,8 +604,11 @@
 
     async function executePayment(method) {
         closePaymentModal();
-        showToast(`正在發起 ${method} 付款...`, 'success');
+        showToast(`正在發起 ${method} 付款...`);
         const formData = new FormData();
+        formData.append('name', document.getElementById('input-name').value);
+        formData.append('phone', document.getElementById('input-phone').value);
+        formData.append('email', document.getElementById('input-email').value);
         formData.append('service', state.service);
         formData.append('date', state.date);
         formData.append('time', state.time);

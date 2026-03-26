@@ -224,13 +224,6 @@
         </div>
     </section>
 
-    <section id="view-records" class="hidden px-4 py-8">
-        <div class="max-w-md mx-auto text-center py-20">
-            <i data-lucide="calendar-x" class="w-12 h-12 mx-auto text-[#c4b89a] mb-4"></i>
-            <p class="text-sm text-[#8b7355]">目前尚未有您的預約紀錄</p>
-        </div>
-    </section>
-
     <footer class="py-12 text-center text-[10px] text-[#c4b89a] border-t border-[#e8e0d4] mt-12">
       © 時光造所 — 讓每一刻都成為回憶
     </footer>
@@ -241,7 +234,7 @@
 
     const watercolorOptions = [
       { id: 'wa', name: '【水彩速寫體驗｜A款】', subName: '經典小風景', spec: '9 x 13 cm 水彩紙畫框', price: 699, drink: '附飲品一杯' },
-      { id: 'wb', name: '【水彩速寫體驗｜B款】', subName: '溫暖的陪伴', spec: '5.5 x 9 cm 壓克力磁鐵 x1 或 5 x 5 cm 壓克力磁鐵 x2', price: 750, drink: '附飲品一杯' },
+      { id: 'wb', name: '【水彩速寫體驗｜B款】', subName: '溫慢的陪伴', spec: '5.5 x 9 cm 壓克力磁鐵 x1 或 5 x 5 cm 壓克力磁鐵 x2', price: 750, drink: '附飲品一杯' },
       { id: 'wc', name: '【熱銷！水彩速寫體驗｜C款】', subName: '完美典藏', spec: '9.5 x 12 cm 壓克力磁鐵', price: 799, drink: '附飲品一杯' },
       { id: 'wd', name: '【水彩速寫體驗｜D款】', subName: '完整創作款', spec: '13.5 x 20 cm 水彩紙', price: 899, drink: '附飲品一杯' }
     ];
@@ -253,8 +246,6 @@
 
     const timeSlots = ["12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
     
-    // 模擬已滿時段 (真實環境應從後端獲取)
-    // 格式: { "2026-03-26": { "12:30": 8 } }
     let bookedData = {}; 
 
     let state = {
@@ -313,16 +304,45 @@
                 <p class="text-sm font-bold text-red-700 mt-1">單人費用：NT$ ${opt.price}</p>
                 <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink}) - ${opt.spec}</p>
             </div>
+            
             <div class="border-t pt-4">
-                <h4 class="font-bold flex items-center gap-2 mb-2"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
-                <p class="text-[11px] text-[#8b7355]">三三畫室黃老師曾任教於大學及社區大學多年...</p>
+                <h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
+                <p class="text-[11px] leading-relaxed text-[#8b7355]">
+                    三三畫室黃老師曾任教於大學及社區大學多年，相信「每個人都能畫出心裡最美的風景」！<br>
+                    老師擅長細膩引導與因材施教，讓學習不再有壓力，即使零基礎，也能慢慢愛上畫畫，在創作裡找到屬於自己的節奏。<br>
+                    <a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline">「三三畫室」粉絲專頁</a>
+                </p>
             </div>
+
             <div class="border-t pt-4">
-                <h4 class="font-bold flex items-center gap-2 mb-2 text-xs"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
-                <ul class="text-[10px] space-y-1 text-[#8b7355]">
-                    <li># 同一時段人數上限 8 人</li>
-                    <li># 教學時長固定 90 分鐘</li>
+                <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
+                <ul class="text-[10px] space-y-1 text-[#8b7355] list-disc pl-4">
+                    <li>不須預約一人即可上課；因位子有限，建議先預約比較保險</li>
+                    <li>同一時段人數上限8人</li>
+                    <li>提供數十種速寫範例選圖（花草／風景／甜點／建築／人物／動物／生活雜貨等）</li>
+                    <li>預約須先付款，若當日無法前來，可保留名額擇日再約。</li>
+                    <li>因系統關係，一次只能預約一人，如有多人預約請分次下單。</li>
+                    <li>套餐內含 $120 經典飲品，更換其他特調飲品僅需補差額。</li>
                 </ul>
+            </div>
+
+            <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4]">
+                <h4 class="font-bold text-[#2c2418] mb-2 text-xs flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 text-red-400"></i> ❤ 限定好禮 ❤</h4>
+                <p class="text-[10px] text-[#8b7355] leading-relaxed">
+                    # 預約手作體驗套餐，現場「打卡分享」並「首次加入官方 LINE」： 每人現場領取 $50 元時光造所選物店購物金！<br>
+                    # 12歲以下小朋友：贈送夾娃娃 2 次
+                </p>
+            </div>
+
+            <div class="border-t pt-4">
+                <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
+                <div class="text-[10px] space-y-2 text-[#8b7355]">
+                    <p><b>【 預約付款 】</b> 本店採全額預付制，完成付款後方保留名額或時段。</p>
+                    <p><b>【 全額退款 】</b> 預約日 2 天前可自行於系統取消，將提供全額退費。</p>
+                    <p><b>【 預約 2 天內 】</b> 系統將自動關閉取消功能：恕不接受退費。僅限聯繫 IG @astimegoesby_handmade 更改日期一次（須於 3 個月內使用完畢）。</p>
+                    <p><b>【 天災政策 】</b> 以新北市政府公告停班停課為準，可全額退費或改期。</p>
+                    <p><b>【 準時入場 】</b> 預約時段固定，遲到恕不補時；無故未到視同放棄，不予退費。</p>
+                </div>
             </div>
         `;
         const btn = document.getElementById('modal-confirm-btn');
@@ -388,7 +408,7 @@
 
     function updateSummary() {
         document.getElementById('confirm-box').innerHTML = `
-            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold">${state.service}</span></div>
+            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right">${state.service}</span></div>
             <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
         `;
     }
@@ -422,19 +442,13 @@
     function renderTimes() {
         const container = document.getElementById('time-slots');
         container.innerHTML = '';
-        
-        // 取得該日預約狀況
         const dailyBookings = bookedData[state.date] || {};
 
         timeSlots.forEach((t, index) => {
             const b = document.createElement('button');
             b.innerText = t;
-            
-            // 檢查該時段是否被 90 分鐘內的預約佔滿
-            // 邏輯：檢查當前時段、前一時段、前二時段是否有預約
             let isFull = false;
             const checkIndices = [index, index - 1, index - 2];
-            
             checkIndices.forEach(idx => {
                 if (idx >= 0) {
                     const checkTime = timeSlots[idx];
@@ -483,7 +497,7 @@
                 await fetch(SCRIPT_URL, { method: 'POST', body: formData });
             }
             setTimeout(() => {
-                alert(`付款成功！\n\n預約項目：${state.service}\n總金額：NT$ ${state.totalPrice}\n確認信已寄至：${email}`);
+                alert(`付款成功！\n\n確認信已寄至：${email}\n感謝您的預約。`);
                 location.reload();
             }, 2000);
         } catch (e) {

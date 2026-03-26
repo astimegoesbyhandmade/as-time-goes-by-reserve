@@ -181,16 +181,9 @@
                                     <input type="email" id="input-email" required class="w-full p-3 bg-[#faf8f5] rounded-xl text-sm border border-[#e8e0d4] focus:border-[#2c2418] outline-none transition-colors" placeholder="用於寄送確認信件">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold mb-1 text-[#8b7355]">預約人數 * (每時段上限8人)</label>
+                                    <label id="people-label" class="block text-xs font-bold mb-1 text-[#8b7355]">預約人數 * (每時段上限8人)</label>
                                     <select id="input-people" onchange="calculatePrice()" required class="w-full p-3 bg-[#faf8f5] rounded-xl text-sm border border-[#e8e0d4] outline-none focus:border-[#2c2418]">
-                                        <option value="1">1 人</option>
-                                        <option value="2">2 人</option>
-                                        <option value="3">3 人</option>
-                                        <option value="4">4 人</option>
-                                        <option value="5">5 人</option>
-                                        <option value="6">6 人</option>
-                                        <option value="7">7 人</option>
-                                        <option value="8">8 人</option>
+                                        <!-- 動態生成選項 -->
                                     </select>
                                 </div>
                                 <div>
@@ -269,9 +262,9 @@
     const beadsOptions = [
       { id: 'ba', type: 'beads', name: '手作別針串珠 DIY | A款', subName: '單人套餐', spec: '珠珠串到滿 + 贈2高級珠珠/吊墜 + 精緻細款緞帶', price: 190, drink: '飲品 1 杯', time: '60min' },
       { id: 'bb', type: 'beads', name: '手作別針串珠 DIY | B款', subName: '精緻單人午茶套餐', spec: '珠珠串到滿 + 贈2高級珠珠/吊墜 + 精緻細款緞帶', price: 299, drink: '飲品 1 杯', time: '90min' },
-      { id: 'bc', type: 'beads', name: '手作別針串珠 DIY | C款', subName: '雙人午後時光套餐', spec: '雙人串到滿 + 贈4高級珠珠/吊墜 + 精緻細款緞帶', price: 550, drink: '飲品 2 杯', time: '90min' },
-      { id: 'bd', type: 'beads', name: '手作別針串珠 DIY | D款', subName: '5-6 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2290, drink: '任選飲品 5-6 杯', time: '120min' },
-      { id: 'be', type: 'beads', name: '手作別針串珠 DIY | E款', subName: '7-8 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2990, drink: '任選飲品 7-8 杯', time: '120min' }
+      { id: 'bc', type: 'beads_double', name: '手作別針串珠 DIY | C款', subName: '雙人午後時光套餐', spec: '雙人串到滿 + 贈4高級珠珠/吊墜 + 精緻細款緞帶', price: 550, drink: '飲品 2 杯', time: '90min' },
+      { id: 'bd', type: 'beads_room', name: '手作別針串珠 DIY | D款', subName: '5-6 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2290, drink: '任選飲品 5-6 杯', time: '120min' },
+      { id: 'be', type: 'beads_room', name: '手作別針串珠 DIY | E款', subName: '7-8 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2990, drink: '任選飲品 7-8 杯', time: '120min' }
     ];
 
     const otherServices = [
@@ -280,12 +273,14 @@
 
     const timeSlots = ["12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
     
+    // 模擬已預約資料：格式 { "日期": { "時段": 座位數, "時段_ROOM": 1 } }
     let bookedData = {}; 
 
     let state = {
       view: 'home',
       step: 1,
       service: null,
+      serviceType: null,
       unitPrice: 0,
       totalPrice: 0,
       date: null,
@@ -294,7 +289,6 @@
     };
 
     function init() {
-        // 渲染水彩
         const wcContainer = document.getElementById('watercolor-options');
         watercolorOptions.forEach(opt => {
             const btn = document.createElement('button');
@@ -308,7 +302,6 @@
             wcContainer.appendChild(btn);
         });
 
-        // 渲染串珠
         const beadContainer = document.getElementById('beads-options');
         beadsOptions.forEach(opt => {
             const btn = document.createElement('button');
@@ -335,6 +328,7 @@
             `;
             card.onclick = () => {
                 state.service = s.name;
+                state.serviceType = 'other';
                 state.unitPrice = s.price;
                 showView('booking');
                 goToStep(1);
@@ -347,7 +341,6 @@
 
     function showDetailModal(opt) {
         const content = document.getElementById('modal-body-content');
-        
         if (opt.type === 'watercolor') {
             content.innerHTML = `
                 <div class="pb-4">
@@ -359,15 +352,8 @@
                     <h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4>
                     <p class="text-[11px] leading-relaxed text-[#8b7355]">三三畫室黃老師曾任教於大學及社區大學多年...</p>
                 </div>
-                <div class="border-t pt-4">
-                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4>
-                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                        <li># 不須預約一人即可上課</li>
-                        <li># 同一時段人數上限8人</li>
-                    </ul>
-                </div>
             `;
-        } else if (opt.type === 'beads') {
+        } else {
             content.innerHTML = `
                 <div class="pb-4">
                     <h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2>
@@ -375,46 +361,26 @@
                     <p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink} | ${opt.time})</p>
                 </div>
                 <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mb-4">
-                    <h4 class="font-bold text-[#2c2418] mb-2 text-xs">【精緻午茶套餐內容】</h4>
+                    <h4 class="font-bold text-[#2c2418] mb-2 text-xs">【套餐內容】</h4>
                     <p class="text-[10px] text-[#8b7355] leading-relaxed">
-                        把對偶像的愛、對閨蜜的情誼、對另一半的告白，通通串進這枚精緻的別針裡。<br>
-                        ✦ 一盞茶的時間：享受精緻飲品與悠閒氛圍。<br>
-                        ✦ 套餐無限的創意：每人任選別針、鑰匙圈各 1 個；紅藍區基礎珠珠串到滿。每人加贈「黃綠區」高級吊墜任選 1 個！<br>
-                        ✦ 質感小禮物包裝袋：我們將免費提供質感透明包裝袋，擁有開箱禮物般的儀式感。
+                        珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶。質感包裝，儀式感十足！
                     </p>
-                </div>
-                <div class="border-t pt-4">
-                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 預約須知</h4>
-                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                        <li># 套餐外加購第二副起，另外計算。</li>
-                        <li># 不須預約一人即可；因位子有限，建議先預約比較保險。</li>
-                        <li># 同一時段人數上限 8 人 (包廂除外)。</li>
-                        <li># 因系統關係，一次只能預約一人，如有多人預約請分次下單。</li>
-                        <li># 預約請先付款，收到確認信即完成預約。</li>
-                    </ul>
                 </div>
             `;
         }
 
-        // 通用條款
+        // 通用規則
         content.innerHTML += `
-            <div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4]">
-                <h4 class="font-bold text-[#2c2418] mb-2 text-xs flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 text-red-400"></i> ❤ 限定好禮 ❤</h4>
-                <p class="text-[10px] text-[#8b7355]">預約手作體驗套餐，現場「打卡分享」並「首次加入官方 LINE」： 每人現場領取 $50 元時光造所選物店購物金！</p>
-            </div>
             <div class="border-t pt-4">
-                <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
-                <div class="text-[10px] space-y-2 text-[#8b7355]">
-                    <p><b>【 預約付款 】</b> 本店採全額預付制，完成付款後方保留名額或時段。</p>
-                    <p><b>【 全額退款 】</b> 預約日 2 天前可自行於系統取消，將提供全額退費。</p>
-                    <p><b>【 預約 2 天內 】</b> 系統將自動關閉取消功能：恕不接受退費。僅限聯繫 IG @astimegoesby_handmade 更改日期一次。</p>
-                </div>
+                <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約須知</h4>
+                <p class="text-[10px] text-[#8b7355]">包廂專案獨立計算，一般專案共用8席座位。預約後不接受退費，僅限改期一次。</p>
             </div>
         `;
 
         const btn = document.getElementById('modal-confirm-btn');
         btn.onclick = () => {
             state.service = opt.subName ? `${opt.name} ${opt.subName}` : opt.name;
+            state.serviceType = opt.type;
             state.unitPrice = opt.price;
             closeDetailModal();
             showView('booking');
@@ -450,7 +416,9 @@
             }
         });
         if(step === 1) renderServiceSelection();
+        if(step === 2) { state.time = null; renderCalendar(); }
         if(step === 3) {
+            updatePeopleOptions();
             updateSummary();
             calculatePrice();
         }
@@ -460,9 +428,9 @@
         const selectedId = e.target.value;
         const allOptions = [...watercolorOptions, ...beadsOptions, ...otherServices];
         const selectedOption = allOptions.find(opt => opt.id === selectedId);
-        
         if (selectedOption) {
             state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name;
+            state.serviceType = selectedOption.type;
             state.unitPrice = selectedOption.price;
         }
     }
@@ -473,12 +441,10 @@
             ...beadsOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
             ...otherServices.map(s => ({ id: s.id, label: `${s.name} - NT$ ${s.price}`, nameOnly: s.name }))
         ];
-
         let optionsHtml = allServices.map(s => {
             const isSelected = (state.service === s.nameOnly) ? 'selected' : '';
             return `<option value="${s.id}" ${isSelected}>${s.label}</option>`;
         }).join('');
-
         const container = document.getElementById('service-options');
         if (container) {
             container.innerHTML = `
@@ -486,9 +452,7 @@
                     <select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">
                         ${optionsHtml}
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i>
-                    </div>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"><i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i></div>
                 </div>
                 <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold transition-all active:scale-[0.98] shadow-md">下一步</button>
             `;
@@ -496,30 +460,79 @@
         }
     }
 
+    // 計算剩餘座位與包廂可用性
+    function getAvailableCapacity(date, time) {
+        const daily = bookedData[date] || {};
+        
+        // 一般座位：檢查前後一個半小時內的最高佔用
+        const idx = timeSlots.indexOf(time);
+        let maxBooked = 0;
+        [idx, idx-1, idx-2].forEach(i => {
+            if(i >= 0) maxBooked = Math.max(maxBooked, daily[timeSlots[i]] || 0);
+        });
+        const seatLeft = 8 - maxBooked;
+
+        // 包廂：檢查前後 2.5 小時 (前後 5 個時段，因為 1 個時段 30 分)
+        let roomOccupied = false;
+        [idx-4, idx-3, idx-2, idx-1, idx, idx+1, idx+2, idx+3, idx+4].forEach(i => {
+            if(i >= 0 && i < timeSlots.length) {
+                if(daily[timeSlots[i] + "_ROOM"]) roomOccupied = true;
+            }
+        });
+
+        return { seatLeft, roomOccupied };
+    }
+
+    function updatePeopleOptions() {
+        const select = document.getElementById('input-people');
+        const label = document.getElementById('people-label');
+        const { seatLeft, roomOccupied } = getAvailableCapacity(state.date, state.time);
+        
+        select.innerHTML = '';
+        
+        if (state.serviceType === 'beads_room') {
+            label.innerText = "預約組數 * (包廂僅限 1 組)";
+            const opt = document.createElement('option');
+            opt.value = "1"; opt.innerText = "1 組";
+            select.appendChild(opt);
+        } 
+        else if (state.serviceType === 'beads_double') {
+            label.innerText = `預約組數 * (剩餘可約 ${Math.floor(seatLeft/2)} 組)`;
+            const maxGroups = Math.min(3, Math.floor(seatLeft / 2));
+            for(let i=1; i<=maxGroups; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.innerText = `${i} 組`;
+                select.appendChild(opt);
+            }
+        } 
+        else {
+            label.innerText = `預約人數 * (剩餘可約 ${seatLeft} 人)`;
+            for(let i=1; i<=seatLeft; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.innerText = `${i} 人`;
+                select.appendChild(opt);
+            }
+        }
+    }
+
     function calculatePrice() {
-        const peopleSelect = document.getElementById('input-people');
-        const people = peopleSelect ? parseInt(peopleSelect.value) : 1;
+        const people = parseInt(document.getElementById('input-people').value) || 1;
         state.totalPrice = state.unitPrice * people;
-        const display = document.getElementById('total-price-display');
-        const detail = document.getElementById('price-detail-text');
-        if (display) display.innerText = `NT$ ${state.totalPrice}`;
-        if (detail) detail.innerText = `明細：NT$ ${state.unitPrice} × ${people} 人`;
+        document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
+        const unitLabel = (state.serviceType.includes('room') || state.serviceType === 'beads_double') ? '組' : '人';
+        document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${people} ${unitLabel}`;
     }
 
     function updateSummary() {
-        const box = document.getElementById('confirm-box');
-        if (box) {
-            box.innerHTML = `
-                <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right">${state.service}</span></div>
-                <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
-            `;
-        }
+        document.getElementById('confirm-box').innerHTML = `
+            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right text-xs">${state.service}</span></div>
+            <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
+        `;
     }
 
     function renderCalendar() {
         const grid = document.getElementById('calendar-grid');
         const label = document.getElementById('calendar-month');
-        if (!grid || !label) return;
         const y = state.month.getFullYear(), m = state.month.getMonth();
         label.innerText = `${y} 年 ${m + 1} 月`;
         grid.innerHTML = '';
@@ -534,8 +547,7 @@
             btn.onclick = () => { 
                 state.date = dStr; 
                 renderCalendar(); 
-                const timeSec = document.getElementById('time-section');
-                if (timeSec) timeSec.classList.remove('hidden'); 
+                document.getElementById('time-section').classList.remove('hidden'); 
                 renderTimes(); 
             };
             grid.appendChild(btn);
@@ -546,35 +558,26 @@
 
     function renderTimes() {
         const container = document.getElementById('time-slots');
-        if (!container) return;
         container.innerHTML = '';
-        const dailyBookings = bookedData[state.date] || {};
-
-        timeSlots.forEach((t, index) => {
+        timeSlots.forEach((t) => {
+            const { seatLeft, roomOccupied } = getAvailableCapacity(state.date, t);
             const b = document.createElement('button');
             b.innerText = t;
-            let isFull = false;
-            const checkIndices = [index, index - 1, index - 2];
-            checkIndices.forEach(idx => {
-                if (idx >= 0) {
-                    const checkTime = timeSlots[idx];
-                    if ((dailyBookings[checkTime] || 0) >= 8) isFull = true;
-                }
-            });
+            
+            let isDisable = false;
+            if (state.serviceType === 'beads_room' && roomOccupied) isDisable = true;
+            if (state.serviceType === 'beads_double' && seatLeft < 2) isDisable = true;
+            if (state.serviceType !== 'beads_room' && seatLeft <= 0) isDisable = true;
 
-            if (isFull) {
+            if (isDisable) {
                 b.className = "time-slot py-3 text-xs border rounded-xl disabled";
                 b.disabled = true;
             } else {
                 b.className = `time-slot py-3 text-xs border rounded-xl font-bold transition-all ${state.time === t ? 'bg-[#2c2418] text-white border-[#2c2418]' : 'border-[#e8e0d4]'}`;
                 b.onclick = () => { 
-                    state.time = t; 
-                    renderTimes(); 
-                    const nextBtn = document.getElementById('btn-to-step3');
-                    if (nextBtn) {
-                        nextBtn.disabled = false; 
-                        nextBtn.classList.remove('opacity-50'); 
-                    }
+                    state.time = t; renderTimes(); 
+                    document.getElementById('btn-to-step3').disabled = false;
+                    document.getElementById('btn-to-step3').classList.remove('opacity-50'); 
                 };
             }
             container.appendChild(b);
@@ -586,32 +589,20 @@
 
     async function executePayment(method) {
         closePaymentModal();
-        const email = document.getElementById('input-email').value;
-        const name = document.getElementById('input-name').value;
         showToast(`正在發起 ${method} 付款...`, 'success');
-
         const formData = new FormData();
-        formData.append('name', name);
-        formData.append('phone', document.getElementById('input-phone').value);
-        formData.append('email', email);
-        formData.append('people', document.getElementById('input-people').value);
         formData.append('service', state.service);
         formData.append('date', state.date);
         formData.append('time', state.time);
-        formData.append('amount', state.totalPrice);
-        formData.append('payment_method', method);
+        formData.append('people', document.getElementById('input-people').value);
+        formData.append('type', state.serviceType);
 
         try {
             if(SCRIPT_URL !== "你的_GOOGLE_APPS_SCRIPT_網址") {
                 await fetch(SCRIPT_URL, { method: 'POST', body: formData });
             }
-            setTimeout(() => {
-                alert(`付款成功！\n\n預約項目：${state.service}\n總金額：NT$ ${state.totalPrice}\n確認信已寄至：${email}`);
-                location.reload();
-            }, 2000);
-        } catch (e) {
-            showToast("系統忙碌中，請聯繫店主。", "error");
-        }
+            setTimeout(() => { alert("付款成功！"); location.reload(); }, 1500);
+        } catch (e) { showToast("錯誤", "error"); }
     }
 
     function showToast(msg) {

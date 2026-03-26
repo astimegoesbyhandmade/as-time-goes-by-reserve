@@ -295,7 +295,7 @@
                 state.service = s.name;
                 state.unitPrice = s.price;
                 showView('booking');
-                goToStep(2);
+                goToStep(1); // 確保從首頁進入時正確停在第一步渲染選單
             };
             otherContainer.appendChild(card);
         });
@@ -358,7 +358,7 @@
             state.unitPrice = opt.price;
             closeDetailModal();
             showView('booking');
-            goToStep(2);
+            goToStep(1); // 跳轉到第一步顯示選單
         };
         document.getElementById('detail-modal').classList.remove('hidden');
         lucide.createIcons();
@@ -378,7 +378,8 @@
     function goToStep(step) {
         state.step = step;
         [1, 2, 3].forEach(s => {
-            document.getElementById(`step-${s}`).classList.toggle('hidden', s !== step);
+            const stepEl = document.getElementById(`step-${s}`);
+            if (stepEl) stepEl.classList.toggle('hidden', s !== step);
             const ind = document.getElementById(`step-${s}-indicator`).querySelector('div');
             if(s <= step) {
                 ind.classList.replace('bg-[#e8e0d4]', 'bg-[#2c2418]');
@@ -398,7 +399,7 @@
     function handleServiceChange(e) {
         const selectedId = e.target.value;
         const allOptions = [...watercolorOptions, ...otherServices];
-        const selectedOption = allOptions.find(opt => opt.id === selectedId || opt.name === selectedId);
+        const selectedOption = allOptions.find(opt => opt.id === selectedId);
         
         if (selectedOption) {
             state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name;
@@ -408,46 +409,56 @@
 
     function renderServiceSelection() {
         const allServices = [
-            ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}` })),
-            ...otherServices.map(s => ({ id: s.id, label: `${s.name} - NT$ ${s.price}` }))
+            ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
+            ...otherServices.map(s => ({ id: s.id, label: `${s.name} - NT$ ${s.price}`, nameOnly: s.name }))
         ];
 
         let optionsHtml = allServices.map(s => {
-            const isSelected = (state.service && state.service.includes(s.label.split(' - ')[0])) ? 'selected' : '';
+            const isSelected = (state.service === s.nameOnly) ? 'selected' : '';
             return `<option value="${s.id}" ${isSelected}>${s.label}</option>`;
         }).join('');
 
-        document.getElementById('service-options').innerHTML = `
-            <div class="relative">
-                <select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">
-                    ${optionsHtml}
-                </select>
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i>
+        const container = document.getElementById('service-options');
+        if (container) {
+            container.innerHTML = `
+                <div class="relative">
+                    <select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">
+                        ${optionsHtml}
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i>
+                    </div>
                 </div>
-            </div>
-            <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold transition-all active:scale-[0.98] shadow-md">下一步</button>
-        `;
-        lucide.createIcons();
+                <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold transition-all active:scale-[0.98] shadow-md">下一步</button>
+            `;
+            lucide.createIcons();
+        }
     }
 
     function calculatePrice() {
-        const people = parseInt(document.getElementById('input-people').value) || 1;
+        const peopleSelect = document.getElementById('input-people');
+        const people = peopleSelect ? parseInt(peopleSelect.value) : 1;
         state.totalPrice = state.unitPrice * people;
-        document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
-        document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${people} 人`;
+        const display = document.getElementById('total-price-display');
+        const detail = document.getElementById('price-detail-text');
+        if (display) display.innerText = `NT$ ${state.totalPrice}`;
+        if (detail) detail.innerText = `明細：NT$ ${state.unitPrice} × ${people} 人`;
     }
 
     function updateSummary() {
-        document.getElementById('confirm-box').innerHTML = `
-            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right">${state.service}</span></div>
-            <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
-        `;
+        const box = document.getElementById('confirm-box');
+        if (box) {
+            box.innerHTML = `
+                <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right">${state.service}</span></div>
+                <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
+            `;
+        }
     }
 
     function renderCalendar() {
         const grid = document.getElementById('calendar-grid');
         const label = document.getElementById('calendar-month');
+        if (!grid || !label) return;
         const y = state.month.getFullYear(), m = state.month.getMonth();
         label.innerText = `${y} 年 ${m + 1} 月`;
         grid.innerHTML = '';
@@ -462,7 +473,8 @@
             btn.onclick = () => { 
                 state.date = dStr; 
                 renderCalendar(); 
-                document.getElementById('time-section').classList.remove('hidden'); 
+                const timeSec = document.getElementById('time-section');
+                if (timeSec) timeSec.classList.remove('hidden'); 
                 renderTimes(); 
             };
             grid.appendChild(btn);
@@ -473,17 +485,15 @@
 
     function renderTimes() {
         const container = document.getElementById('time-slots');
+        if (!container) return;
         container.innerHTML = '';
-        
         const dailyBookings = bookedData[state.date] || {};
 
         timeSlots.forEach((t, index) => {
             const b = document.createElement('button');
             b.innerText = t;
-            
             let isFull = false;
             const checkIndices = [index, index - 1, index - 2];
-            
             checkIndices.forEach(idx => {
                 if (idx >= 0) {
                     const checkTime = timeSlots[idx];
@@ -499,8 +509,11 @@
                 b.onclick = () => { 
                     state.time = t; 
                     renderTimes(); 
-                    document.getElementById('btn-to-step3').disabled = false; 
-                    document.getElementById('btn-to-step3').classList.remove('opacity-50'); 
+                    const nextBtn = document.getElementById('btn-to-step3');
+                    if (nextBtn) {
+                        nextBtn.disabled = false; 
+                        nextBtn.classList.remove('opacity-50'); 
+                    }
                 };
             }
             container.appendChild(b);

@@ -81,7 +81,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="studio-options"></div>
         </div>
 
-        <!-- 水彩速寫區塊 -->
+        <!-- 水彩速寫體驗區塊 -->
         <div class="bg-white rounded-3xl border border-[#e8e0d4] p-6 shadow-sm overflow-hidden fade-in">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 bg-[#fcfaf7] rounded-xl flex items-center justify-center">
@@ -116,8 +116,6 @@
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="beads-options"></div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="other-services"></div>
       </div>
     </section>
 
@@ -255,13 +253,6 @@
         </div>
     </section>
 
-    <section id="view-records" class="hidden px-4 py-8">
-        <div class="max-w-md mx-auto text-center py-20">
-            <i data-lucide="calendar-x" class="w-12 h-12 mx-auto text-[#c4b89a] mb-4"></i>
-            <p class="text-sm text-[#8b7355]">目前尚未有您的預約紀錄</p>
-        </div>
-    </section>
-
     <footer class="py-12 text-center text-[10px] text-[#c4b89a] border-t border-[#e8e0d4] mt-12">
       © 時光造所 — 讓每一刻都成為回憶
     </footer>
@@ -269,6 +260,7 @@
 
   <script>
     const SCRIPT_URL = "你的_GOOGLE_APPS_SCRIPT_網址";
+    const STUDIO_PAYMENT_URL = "https://core.newebpay.com/EPG/AsTimeGoesBy手作_時光造所/8fC9XA";
 
     const studioOptions = [
       { id: 'st_a', type: 'studio', name: '攝影棚預約', subName: '自然光&背景紙', spec: '每小時 $850 (低消 2 小時)', price: 850 }
@@ -289,24 +281,9 @@
       { id: 'be', type: 'beads_room', name: '手作別針串珠 DIY | E款', subName: '7-8 人手作包廂派對', spec: '獨立包廂 | 珠珠串到滿 + 贈高級吊墜 + 精緻細款緞帶', price: 2990, drink: '任選飲品 7-8 杯', time: '120min' }
     ];
 
-    const otherServices = [];
-
-    // 攝影棚/包廂可選時段 (依需求調整)
     const timeSlots = ["12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"];
-    
     let bookedData = {}; 
-
-    let state = {
-      view: 'home',
-      step: 1,
-      service: null,
-      serviceType: null,
-      unitPrice: 0,
-      totalPrice: 0,
-      date: null,
-      time: null,
-      month: new Date()
-    };
+    let state = { view: 'home', step: 1, service: null, serviceType: null, unitPrice: 0, totalPrice: 0, date: null, time: null, month: new Date() };
 
     function init() {
         const stContainer = document.getElementById('studio-options');
@@ -317,7 +294,6 @@
             btn.onclick = () => showDetailModal(opt);
             stContainer.appendChild(btn);
         });
-
         const wcContainer = document.getElementById('watercolor-options');
         watercolorOptions.forEach(opt => {
             const btn = document.createElement('button');
@@ -326,7 +302,6 @@
             btn.onclick = () => showDetailModal(opt);
             wcContainer.appendChild(btn);
         });
-
         const beadContainer = document.getElementById('beads-options');
         beadsOptions.forEach(opt => {
             const btn = document.createElement('button');
@@ -335,75 +310,76 @@
             btn.onclick = () => showDetailModal(opt);
             beadContainer.appendChild(btn);
         });
-
         renderCalendar();
         lucide.createIcons();
     }
 
     function showDetailModal(opt) {
         const content = document.getElementById('modal-body-content');
-        
         if (opt.type === 'studio') {
             content.innerHTML = `
-                <div class="pb-4">
-                    <h2 class="text-lg font-bold text-[#2c2418]">${opt.name} (自然光&背景紙)</h2>
-                    <p class="text-xs text-[#8b7355] mt-2 leading-relaxed">時光造所是一個結合 空間租借、手作課程、選物店與輕食咖啡 的多功能複合式場域。為維護拍攝品質與雙方權益，預約前請詳閱條款。</p>
-                </div>
-                <div class="border-t pt-4 space-y-4">
-                    <h4 class="font-bold flex items-center gap-2 text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 預約流程與費用</h4>
-                    <ul class="text-[10px] space-y-1 text-[#8b7355] list-none">
-                        <li># 租借費用：$850/hr，低消 2 小時起</li>
-                        <li># 優惠說明：第 4 小時起(含)，每小時優惠 $800</li>
-                        <li># 人數限制：上限 6 人（含工作人員），超過每人加收 $200 (最多10人)</li>
-                        <li># 收音提醒：拍攝以平面為主，收音環境簡約</li>
-                        <li># 進場緩衝：12:30 無前置緩衝，其餘時段可提前 10 分鐘，結束有 15 分鐘收場緩衝</li>
-                    </ul>
-                </div>
-                <div class="border-t pt-4">
-                    <h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="gift" class="w-4 h-4"></i> 專屬優惠與器材</h4>
-                    <p class="text-[10px] text-[#8b7355]">預約當日享飲品 9 折 / 學生證送 $50 購物金。<br>提供 Godox 燈具、電動背景紙、化妝更衣間、掛燙機等免費使用。</p>
-                </div>
-            `;
+                <div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">攝影棚預約 (自然光&背景紙)</h2></div>
+                <div class="text-[10px] space-y-4 text-[#8b7355]">
+                    <div class="border-t pt-4"><h4 class="font-bold text-[#2c2418] mb-2">一、 預約流程與費用</h4>
+                        <p>【 租借費用 】 每小時 850 元，低消 2 小時；第 4 小時起每小時優惠 800 元。<br>【 人數限制 】 上限 6 人；舞蹈表演最多 2 人。超過 6 人每人加收 $200 (最多10人)。<br>【 準時入場 】 12:30 無前置緩衝，其餘提前 10 分鐘；結束有 15 分鐘收場緩衝。</p>
+                    </div>
+                    <div class="border-t pt-4"><h4 class="font-bold text-[#2c2418] mb-2">二、 預約優惠與空間</h4>
+                        <p>【 專屬優惠 】 享飲品 9 折。提供專屬化妝更衣間、電動背景紙、Godox 專業燈具等免費使用。</p>
+                    </div>
+                </div>`;
         } else if (opt.type === 'watercolor') {
-            content.innerHTML = `<div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2><p class="text-sm font-bold text-red-700 mt-1">單人費用：NT$ ${opt.price}</p><p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink}) - ${opt.spec}</p></div><div class="border-t pt-4"><h4 class="font-bold flex items-center gap-2 mb-2 text-[#2c2418]"><i data-lucide="user" class="w-4 h-4"></i> 師資介紹</h4><p class="text-[11px] leading-relaxed text-[#8b7355]">三三畫室黃老師曾任教於大學及社區大學多年...<br><a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline font-medium mt-1 inline-block">「三三畫室」粉絲專頁</a></p></div><div class="border-t pt-4"><h4 class="font-bold flex items-center gap-2 mb-2 text-xs text-[#2c2418]"><i data-lucide="info" class="w-4 h-4"></i> 水彩速寫體驗規則</h4><ul class="text-[10px] space-y-1 text-[#8b7355] list-none"><li># 同一時段人數上限8人</li><li># 套餐內含 $120 經典飲品</li></ul></div>`;
+            content.innerHTML = `
+                <div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">【水彩速寫體驗】</h2></div>
+                <div class="text-[10px] space-y-4 text-[#8b7355]">
+                    <div class="border-t pt-4"><h4 class="font-bold text-[#2c2418] mb-2">師資介紹</h4>
+                        <p>三三畫室黃老師曾任教於大學及社區大學多年，擅長細膩引導，讓零基礎也能在創作裡找到屬於自己的節奏。<br><a href="https://reurl.cc/bd6blr" target="_blank" class="text-blue-500 underline">三三畫室粉絲專頁</a></p>
+                    </div>
+                    <div class="border-t pt-4"><h4 class="font-bold text-[#2c2418] mb-2">體驗規則</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>不須預約一人即可上課；同一時段上限 8 人</li>
+                            <li>提供數十種速寫範例選圖（花草／風景／甜點／人物等）</li>
+                            <li>套餐內含 $120 經典飲品，更換特調補差額即可</li>
+                            <li>一次只能預約一人，多人請分次下單</li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#fcfaf7] p-4 rounded-xl border border-[#e8e0d4]"><h4 class="font-bold text-red-400 mb-1">❤ 限定好禮 ❤</h4>
+                        <p>打卡分享＋加入官方 LINE：領 $50 選物購物金！12歲以下小朋友贈送夾娃娃 2 次。</p>
+                    </div>
+                </div>`;
         } else if (opt.type.includes('beads')) {
-            content.innerHTML = `<div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">${opt.name}</h2><p class="text-sm font-bold text-red-700 mt-1">費用：NT$ ${opt.price}</p><p class="text-xs text-[#8b7355]">${opt.subName} (${opt.drink} | ${opt.time})</p></div><div class="bg-[#fcfaf7] p-4 rounded-2xl border border-[#e8e0d4] mb-4"><h4 class="font-bold text-[#2c2418] mb-2 text-xs">【方案特色】</h4><p class="text-[10px] text-[#8b7355] leading-relaxed">珠珠串到滿，贈送高級吊墜與緞帶。<br>提供質感透明包裝袋。</p></div>`;
+            content.innerHTML = `
+                <div class="pb-4"><h2 class="text-lg font-bold text-[#2c2418]">【手作別針串珠 DIY】</h2></div>
+                <div class="text-[10px] space-y-4 text-[#8b7355]">
+                    <div class="border-t pt-4"><h4 class="font-bold text-[#2c2418] mb-2">方案特色</h4>
+                        <p>享受精緻飲品。珠珠串到滿，加贈高級吊墜與質感包裝袋。</p>
+                    </div>
+                    <div class="border-t pt-4"><h4 class="font-bold text-[#2c2418] mb-2">預約須知</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>單次預約上限 8 人（包廂除外）</li>
+                            <li>多人預約請分次下單</li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#fcfaf7] p-4 rounded-xl border border-[#e8e0d4]"><h4 class="font-bold text-red-400 mb-1">❤ 限定好禮 ❤</h4>
+                        <p>打卡分享＋加入官方 LINE：領 $50 選物購物金！</p>
+                    </div>
+                </div>`;
         }
 
         content.innerHTML += `
-            <div class="border-t pt-4">
-                <h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
+            <div class="border-t pt-4"><h4 class="font-bold text-red-600 mb-2 text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ⚠️ 預約退改須知 (必讀)</h4>
                 <div class="text-[10px] space-y-2 text-[#8b7355]">
-                    <p><b>【 預約付款 】</b> 採全額預付制，完成付款後方保留名額。</p>
-                    <p><b>【 退款政策 】</b> 預約日 2 天前取消可全額退費。2 天內恕不退費，僅限改期一次。</p>
-                    <p><b>【 準時入場 】</b> 時段固定，遲到恕不補時；未到視同放棄。</p>
+                    <p><b>【 預約付款 】</b> 全額預付制，付款後保留名額。<br><b>【 全額退款 】</b> 2 天前取消可全額退費。2 天內不退費，僅限 IG 改期一次。<br><b>【 天災政策 】</b> 以政府公告停班課為準。<br><b>【 準時入場 】</b> 時段固定，遲到不補時。</p>
                 </div>
-            </div>
-        `;
+            </div>`;
 
         const btn = document.getElementById('modal-confirm-btn');
-        btn.onclick = () => {
-            state.service = opt.subName ? `${opt.name} ${opt.subName}` : opt.name;
-            state.serviceType = opt.type;
-            state.unitPrice = opt.price;
-            closeDetailModal();
-            showView('booking');
-            goToStep(1);
-        };
+        btn.onclick = () => { state.service = opt.subName ? `${opt.name} ${opt.subName}` : opt.name; state.serviceType = opt.type; state.unitPrice = opt.price; closeDetailModal(); showView('booking'); goToStep(1); };
         document.getElementById('detail-modal').classList.remove('hidden');
         lucide.createIcons();
     }
 
     function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
-
-    function showView(view) {
-        state.view = view;
-        ['home', 'booking', 'info', 'records'].forEach(v => {
-            document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view);
-            document.getElementById(`dot-${v}`).classList.toggle('active', v === view);
-        });
-        window.scrollTo(0,0);
-    }
+    function showView(view) { state.view = view; ['home', 'booking', 'info', 'records'].forEach(v => { document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view); document.getElementById(`dot-${v}`).classList.toggle('active', v === view); }); window.scrollTo(0,0); }
 
     function goToStep(step) {
         state.step = step;
@@ -411,32 +387,19 @@
             const stepEl = document.getElementById(`step-${s}`);
             if (stepEl) stepEl.classList.toggle('hidden', s !== step);
             const ind = document.getElementById(`step-${s}-indicator`).querySelector('div');
-            if(s <= step) {
-                ind.classList.replace('bg-[#e8e0d4]', 'bg-[#2c2418]');
-                ind.classList.replace('text-[#8b7355]', 'text-white');
-            } else {
-                ind.classList.replace('bg-[#2c2418]', 'bg-[#e8e0d4]');
-                ind.classList.replace('text-white', 'text-[#8b7355]');
-            }
+            if(s <= step) { ind.classList.replace('bg-[#e8e0d4]', 'bg-[#2c2418]'); ind.classList.replace('text-[#8b7355]', 'text-white'); }
+            else { ind.classList.replace('bg-[#2c2418]', 'bg-[#e8e0d4]'); ind.classList.replace('text-white', 'text-[#8b7355]'); }
         });
         if(step === 1) renderServiceSelection();
         if(step === 2) { state.time = null; renderCalendar(); }
-        if(step === 3) {
-            updatePeopleOptions();
-            updateSummary();
-            calculatePrice();
-        }
+        if(step === 3) { updatePeopleOptions(); updateSummary(); calculatePrice(); }
     }
 
     function handleServiceChange(e) {
         const selectedId = e.target.value;
         const allOptions = [...studioOptions, ...watercolorOptions, ...beadsOptions];
         const selectedOption = allOptions.find(opt => opt.id === selectedId);
-        if (selectedOption) {
-            state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name;
-            state.serviceType = selectedOption.type;
-            state.unitPrice = selectedOption.price;
-        }
+        if (selectedOption) { state.service = selectedOption.subName ? `${selectedOption.name} ${selectedOption.subName}` : selectedOption.name; state.serviceType = selectedOption.type; state.unitPrice = selectedOption.price; }
     }
 
     function renderServiceSelection() {
@@ -445,46 +408,19 @@
             ...watercolorOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` })),
             ...beadsOptions.map(opt => ({ id: opt.id, label: `${opt.name} ${opt.subName} - NT$ ${opt.price}`, nameOnly: `${opt.name} ${opt.subName}` }))
         ];
-        let optionsHtml = allServices.map(s => {
-            const isSelected = (state.service === s.nameOnly) ? 'selected' : '';
-            return `<option value="${s.id}" ${isSelected}>${s.label}</option>`;
-        }).join('');
-        const container = document.getElementById('service-options');
-        if (container) {
-            container.innerHTML = `
-                <div class="relative">
-                    <select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">
-                        ${optionsHtml}
-                    </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"><i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i></div>
-                </div>
-                <button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold transition-all active:scale-[0.98] shadow-md">下一步</button>
-            `;
-            lucide.createIcons();
-        }
+        let optionsHtml = allServices.map(s => { const isSelected = (state.service === s.nameOnly) ? 'selected' : ''; return `<option value="${s.id}" ${isSelected}>${s.label}</option>`; }).join('');
+        document.getElementById('service-options').innerHTML = `<div class="relative"><select id="service-dropdown" onchange="handleServiceChange(event)" class="w-full p-4 bg-[#fcfaf7] rounded-xl border border-[#2c2418] text-sm font-bold appearance-none outline-none focus:ring-2 focus:ring-[#2c2418]">${optionsHtml}</select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"><i data-lucide="chevron-down" class="w-5 h-5 text-[#2c2418]"></i></div></div><button onclick="goToStep(2)" class="w-full mt-4 py-4 bg-[#2c2418] text-white rounded-2xl font-bold shadow-md">下一步</button>`;
+        lucide.createIcons();
     }
 
     function getAvailableCapacity(date, time) {
         const daily = bookedData[date] || {};
         const idx = timeSlots.indexOf(time);
-        
-        // 基本人數容量
         let maxBooked = 0;
-        [idx, idx-1, idx-2].forEach(i => {
-            if(i >= 0) maxBooked = Math.max(maxBooked, daily[timeSlots[i]] || 0);
-        });
+        [idx, idx-1, idx-2].forEach(i => { if(i >= 0) maxBooked = Math.max(maxBooked, daily[timeSlots[i]] || 0); });
         const seatLeft = 8 - maxBooked;
-
-        // 獨立包廂/攝影棚共用排他性
         let roomOccupied = false;
-        // 往前檢查與往後檢查 (包含清潔緩衝 1 小時)
-        // 往後預防：idx+1, idx+2 等若已被佔用，則不能預約。
-        [idx-4, idx-3, idx-2, idx-1, idx, idx+1, idx+2, idx+3, idx+4].forEach(i => {
-            if(i >= 0 && i < timeSlots.length) {
-                if(daily[timeSlots[i] + "_ROOM"]) roomOccupied = true;
-                if(daily[timeSlots[i] + "_STUDIO"]) roomOccupied = true;
-            }
-        });
+        [idx-4, idx-3, idx-2, idx-1, idx, idx+1, idx+2, idx+3, idx+4].forEach(i => { if(i >= 0 && i < timeSlots.length) { if(daily[timeSlots[i] + "_ROOM"] || daily[timeSlots[i] + "_STUDIO"]) roomOccupied = true; } });
         return { seatLeft, roomOccupied };
     }
 
@@ -493,106 +429,60 @@
         const label = document.getElementById('people-label');
         const { seatLeft } = getAvailableCapacity(state.date, state.time);
         select.innerHTML = '';
-        
         if (state.serviceType === 'studio') {
             label.innerText = "預約時數 * (最低 2 小時)";
-            for(let i=2; i<=6; i++) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.innerText = `${i} 小時`;
-                select.appendChild(opt);
-            }
+            for(let i=2; i<=6; i++) { const opt = document.createElement('option'); opt.value = i; opt.innerText = `${i} 小時`; select.appendChild(opt); }
         } else if (state.serviceType === 'beads_room') {
             label.innerText = "預約組數 * (包廂僅限 1 組)";
-            const opt = document.createElement('option');
-            opt.value = "1"; opt.innerText = "1 組";
-            select.appendChild(opt);
-        } else if (state.serviceType === 'beads_double') {
-            label.innerText = `預約組數 * (剩餘可約 ${Math.floor(seatLeft/2)} 組)`;
-            const maxGroups = Math.min(3, Math.floor(seatLeft / 2));
-            for(let i=1; i<=maxGroups; i++) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.innerText = `${i} 組`;
-                select.appendChild(opt);
-            }
+            const opt = document.createElement('option'); opt.value = "1"; opt.innerText = "1 組"; select.appendChild(opt);
         } else {
-            label.innerText = `預約人數 * (剩餘可約 ${seatLeft} 人)`;
-            for(let i=1; i<=seatLeft; i++) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.innerText = `${i} 人`;
-                select.appendChild(opt);
-            }
+            label.innerText = `預約人數 * (剩餘可約 ${state.serviceType === 'beads_double' ? Math.floor(seatLeft/2) : seatLeft} 人)`;
+            const max = state.serviceType === 'beads_double' ? Math.min(3, Math.floor(seatLeft/2)) : seatLeft;
+            for(let i=1; i<=max; i++) { const opt = document.createElement('option'); opt.value = i; opt.innerText = `${i} ${state.serviceType === 'beads_double' ? '組' : '人'}`; select.appendChild(opt); }
         }
     }
 
     function calculatePrice() {
         const val = parseInt(document.getElementById('input-people').value) || 1;
-        
         if (state.serviceType === 'studio') {
-            // 攝影棚階梯計費：1-3hr 850, 4hr+ 800
-            if (val >= 4) {
-                state.totalPrice = val * 800;
-            } else {
-                state.totalPrice = val * 850;
-            }
+            state.totalPrice = val >= 4 ? val * 800 : val * 850;
             document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
             document.getElementById('price-detail-text').innerText = `明細：時薪 ${val >= 4 ? 800 : 850} × ${val} 小時`;
         } else {
             state.totalPrice = state.unitPrice * val;
             document.getElementById('total-price-display').innerText = `NT$ ${state.totalPrice}`;
-            const unitLabel = (state.serviceType.includes('room') || state.serviceType === 'beads_double') ? '組' : '人';
-            document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${val} ${unitLabel}`;
+            document.getElementById('price-detail-text').innerText = `明細：NT$ ${state.unitPrice} × ${val} 人`;
         }
     }
 
-    function updateSummary() {
-        document.getElementById('confirm-box').innerHTML = `
-            <div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right text-xs">${state.service}</span></div>
-            <div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>
-        `;
-    }
+    function updateSummary() { document.getElementById('confirm-box').innerHTML = `<div class="flex justify-between border-b pb-2"><span>項目</span><span class="font-bold text-right text-xs">${state.service}</span></div><div class="flex justify-between py-2"><span>時間</span><span class="font-bold">${state.date} ${state.time}</span></div>`; }
 
     function renderCalendar() {
         const grid = document.getElementById('calendar-grid');
         const label = document.getElementById('calendar-month');
         const y = state.month.getFullYear(), m = state.month.getMonth();
-        label.innerText = `${y} 年 ${m + 1} 月`;
-        grid.innerHTML = '';
-        const first = new Date(y, m, 1).getDay();
-        const days = new Date(y, m + 1, 0).getDate();
+        label.innerText = `${y} 年 ${m + 1} 月`; grid.innerHTML = '';
+        const first = new Date(y, m, 1).getDay(); const days = new Date(y, m + 1, 0).getDate();
         for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
         for(let d=1; d<=days; d++) {
-            const btn = document.createElement('button');
-            const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            btn.innerText = d;
-            btn.className = `w-full aspect-square text-xs rounded-xl transition-all ${state.date === dStr ? 'bg-[#2c2418] text-white shadow-md' : 'hover:bg-gray-100'}`;
+            const btn = document.createElement('button'); const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            btn.innerText = d; btn.className = `w-full aspect-square text-xs rounded-xl transition-all ${state.date === dStr ? 'bg-[#2c2418] text-white shadow-md' : 'hover:bg-gray-100'}`;
             btn.onclick = () => { state.date = dStr; renderCalendar(); document.getElementById('time-section').classList.remove('hidden'); renderTimes(); };
             grid.appendChild(btn);
         }
     }
 
     function changeMonth(n) { state.month.setMonth(state.month.getMonth() + n); renderCalendar(); }
-
     function renderTimes() {
-        const container = document.getElementById('time-slots');
-        container.innerHTML = '';
+        const container = document.getElementById('time-slots'); container.innerHTML = '';
         timeSlots.forEach((t) => {
             const { seatLeft, roomOccupied } = getAvailableCapacity(state.date, t);
-            const b = document.createElement('button');
-            b.innerText = t;
-            let isDisable = false;
-            
-            // 攝影棚與包廂派對排他性
+            const b = document.createElement('button'); b.innerText = t; let isDisable = false;
             if ((state.serviceType === 'studio' || state.serviceType === 'beads_room') && roomOccupied) isDisable = true;
             if (state.serviceType === 'beads_double' && seatLeft < 2) isDisable = true;
             if (!state.serviceType.includes('room') && state.serviceType !== 'studio' && seatLeft <= 0) isDisable = true;
-
-            if (isDisable) {
-                b.className = "time-slot py-3 text-xs border rounded-xl disabled";
-                b.disabled = true;
-            } else {
-                b.className = `time-slot py-3 text-xs border rounded-xl font-bold transition-all ${state.time === t ? 'bg-[#2c2418] text-white border-[#2c2418]' : 'border-[#e8e0d4]'}`;
-                b.onclick = () => { state.time = t; renderTimes(); document.getElementById('btn-to-step3').disabled = false; document.getElementById('btn-to-step3').classList.remove('opacity-50'); };
-            }
+            if (isDisable) { b.className = "time-slot py-3 text-xs border rounded-xl disabled"; b.disabled = true; }
+            else { b.className = `time-slot py-3 text-xs border rounded-xl font-bold transition-all ${state.time === t ? 'bg-[#2c2418] text-white border-[#2c2418]' : 'border-[#e8e0d4]'}`; b.onclick = () => { state.time = t; renderTimes(); document.getElementById('btn-to-step3').disabled = false; document.getElementById('btn-to-step3').classList.remove('opacity-50'); }; }
             container.appendChild(b);
         });
     }
@@ -602,33 +492,33 @@
 
     async function executePayment(method) {
         closePaymentModal();
+        const name = document.getElementById('input-name').value;
+        const phone = document.getElementById('input-phone').value;
+        const email = document.getElementById('input-email').value;
+
+        // 如果是攝影棚預約且選擇信用卡付款，跳轉到訂金頁面
+        if (state.serviceType === 'studio' && method === 'Credit Card') {
+            showToast("正在跳轉至攝影棚訂金支付頁面...");
+            setTimeout(() => { window.location.href = STUDIO_PAYMENT_URL; }, 1500);
+            return;
+        }
+
         showToast(`正在發起 ${method} 付款...`);
         const formData = new FormData();
-        formData.append('name', document.getElementById('input-name').value);
-        formData.append('phone', document.getElementById('input-phone').value);
-        formData.append('email', document.getElementById('input-email').value);
-        formData.append('service', state.service);
-        formData.append('date', state.date);
-        formData.append('time', state.time);
-        formData.append('people', document.getElementById('input-people').value);
-        formData.append('type', state.serviceType);
+        formData.append('name', name); formData.append('phone', phone); formData.append('email', email);
+        formData.append('service', state.service); formData.append('date', state.date); formData.append('time', state.time);
+        formData.append('people', document.getElementById('input-people').value); formData.append('type', state.serviceType);
 
         try {
-            if(SCRIPT_URL !== "你的_GOOGLE_APPS_SCRIPT_網址") {
-                await fetch(SCRIPT_URL, { method: 'POST', body: formData });
-            }
-            setTimeout(() => { alert("付款成功！"); location.reload(); }, 1500);
+            if(SCRIPT_URL !== "你的_GOOGLE_APPS_SCRIPT_網址") { await fetch(SCRIPT_URL, { method: 'POST', body: formData }); }
+            setTimeout(() => { alert("預約資料已送出！" + (method === 'Line Pay' ? "請依 LINE Pay 指示完成操作。" : "付款完成！")); location.reload(); }, 1500);
         } catch (e) { showToast("錯誤", "error"); }
     }
 
     function showToast(msg) {
-        const t = document.createElement('div');
-        t.className = 'toast-enter p-4 bg-[#2c2418] text-white rounded-xl text-xs font-bold z-[100]';
-        t.innerText = msg;
-        document.getElementById('toast-container').appendChild(t);
-        setTimeout(() => t.remove(), 3000);
+        const t = document.createElement('div'); t.className = 'toast-enter p-4 bg-[#2c2418] text-white rounded-xl text-xs font-bold z-[100]'; t.innerText = msg;
+        document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 3000);
     }
-
     init();
   </script>
 </body>
